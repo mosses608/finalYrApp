@@ -59,7 +59,7 @@ class UserController extends Controller
                 'username' => $request->email,
                 'password' => Hash::make($request->password),
                 'user_id' => $userId,
-                'user_type' => 1,
+                'user_type' => 3,
             ]);
 
             DB::table('wallets')->insert([

@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Services\CurrencyConverter;
+use Illuminate\Support\Facades\Hash;
 
 class PageController extends Controller
 {
@@ -25,9 +26,42 @@ class PageController extends Controller
 
     public function dashboard()
     {
+        $myPickUpRequests = DB::table('waste_schedule_pickup')
+            ->select([
+                'pickup_date',
+                'preferred_time',
+                'frequency',
+                'location',
+                'status',
+                'id'
+            ])
+            ->where('soft_delete', 0)
+            ->where('user_id', Auth::user()->user_id)
+            ->orderByDesc('id')
+            ->get();
+
+        $monthlyRequests = DB::table('waste_schedule_pickup')
+            ->select([
+                DB::raw('MONTH(pickup_date) as month'),
+                DB::raw('COUNT(*) as total_requests')
+            ])
+            ->where('soft_delete', 0)
+            ->where('user_id', Auth::user()->user_id)
+            ->groupBy(DB::raw('MONTH(pickup_date)'))
+            ->orderBy(DB::raw('MONTH(pickup_date)'))
+            ->get();
+
+        $months = [];
+        $totals = [];
+
+        foreach ($monthlyRequests as $item) {
+            $months[] = \Carbon\Carbon::create()->month($item->month)->format('F');
+            $totals[] = $item->total_requests;
+        }
+
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
         // dd($balance);
-        return view('templates.dashboard', compact('balance'));
+        return view('templates.dashboard', compact('balance', 'myPickUpRequests', 'months','totals'));
     }
 
     public function myWallet()
@@ -213,7 +247,7 @@ class PageController extends Controller
 
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
 
-        return view('templates.view-request', compact('thisRequests', 'paymentDetails','balance'));
+        return view('templates.view-request', compact('thisRequests', 'paymentDetails', 'balance'));
         // dd($pickupId);
     }
 
