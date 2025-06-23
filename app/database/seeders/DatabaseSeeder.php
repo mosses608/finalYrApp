@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         // $this->call(UserRoleSeeder::class);
-        $this->call(RecyclableMaterialCategorySeeder::class);
+        // $this->call(RecyclableMaterialCategorySeeder::class);
+        $this->call(UserSeeder::class);
     }
 }
