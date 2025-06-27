@@ -23,6 +23,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-wallet', [App\Http\Controllers\Pages\PageController::class, 'myWallet'])->name('my.wallet');
     Route::get('/recycle-exchange', [App\Http\Controllers\Pages\PageController::class, 'recycleExchange'])->name('recycle.exchange');
     Route::post('/recyclables', [App\Http\Controllers\Pages\PageController::class, 'recyclablePost'])->name('recyclable.post');
+    Route::get('/transactions', [App\Http\Controllers\Pages\PageController::class, 'transactions'])->name('transactions.view');
+    Route::get('/pick-up-schedule', [App\Http\Controllers\Pages\PageController::class, 'schedulePickUpDay'])->name('schedule.pickups.day');
+    Route::post('/store-pick-ups', [App\Http\Controllers\Pages\PageController::class, 'storePickUpsData'])->name('store.pickups');
+    Route::post('/store-schedules', [App\Http\Controllers\Pages\PageController::class, 'storeSchedulesPickUp'])->name('store.pickup.schedules');
+
+
+    // USER MGT
+    Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');
+    Route::post('/store.staff', [App\Http\Controllers\Users\UserController::class, 'storeStaff'])->name('store.staff');
+
 
     // PAYMENTS
     Route::post('/checkout', [App\Http\Controllers\Payment\PaymentController::class, 'checkoutPay'])->name('pay.ckechout');

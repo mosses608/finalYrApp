@@ -13,7 +13,7 @@
                                 <h6 class="text-muted mb-0">All Requests</h6>
                             </div>
                         </div>
-                        <h3 class="fw-bold float-end fs-5">2,190</h3>
+                        <h3 class="fw-bold float-end fs-5">{{ number_format($allRequestsCounter) }}</h3>
                     </div>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                                 <h6 class="text-muted mb-0">Pendings</h6>
                             </div>
                         </div>
-                        <h3 class="fw-bold float-end fs-5">2,190</h3>
+                        <h3 class="fw-bold float-end fs-5">{{ number_format($pendingRequestsCounter) }}</h3>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                                 <h6 class="text-muted mb-0">Accepted</h6>
                             </div>
                         </div>
-                        <h3 class="fw-bold float-end fs-5">2,190</h3>
+                        <h3 class="fw-bold float-end fs-5">{{ number_format($acceptedRequestsCounter) }}</h3>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                                 <h6 class="text-muted mb-0">Completed</h6>
                             </div>
                         </div>
-                        <h3 class="fw-bold float-end fs-5">2,190</h3>
+                        <h3 class="fw-bold float-end fs-5">{{  number_format($compltedRequestsCounter)}}</h3>
                     </div>
                 </div>
             </div>

@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'login_attempts' => 0,
             'blocked_at' => null,
-            'is_new' => null,
+            'is_new' => 1,
         ]);
     }
 }

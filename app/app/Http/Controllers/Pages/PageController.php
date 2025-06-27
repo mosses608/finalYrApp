@@ -24,6 +24,124 @@ class PageController extends Controller
         return view('templates.register');
     }
 
+    public function schedulePickUpDay()
+    {
+        $staffs = DB::table('staff')
+            ->select([
+                'id',
+                'names',
+            ])
+            ->where('soft_delete', 0)
+            ->whereNot('role', 1)
+            ->orderBy('names', 'ASC')
+            ->get();
+
+        $pickUpsData = DB::table('pickup_management AS PU')
+            ->join('staff AS S', 'PU.added_by', '=', 'S.id')
+            ->select([
+                'PU.pick_up_name AS pName',
+                'PU.reg_number AS regNo',
+                'S.names AS names',
+                'PU.id AS id'
+            ])
+            ->where('PU.soft_delete', 0)
+            ->where('S.soft_delete', 0)
+            ->orderBy('PU.pick_up_name', 'ASC')
+            ->get();
+
+        $pickUpAreas = DB::table('waste_schedule_pickup')
+            ->select([
+                'location',
+            ])
+            ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->where('soft_delete', 0)
+            ->groupBy('location')
+            ->get();
+
+        $schedules = DB::table('pick_up_date_schedule AS PS')
+            ->join('pickup_management AS PM', 'PS.pick_up_id', '=', 'PM.id')
+            ->join('staff AS ST', 'PS.staff_id', '=', 'ST.id')
+            ->select([
+                'PM.pick_up_name AS pName',
+                'PS.pickup_day AS day',
+                'PS.preferred_time AS time',
+                'PS.location AS area',
+                'ST.names AS names',
+            ])
+            ->where('PS.soft_delete', 0)
+            ->orderBy('PS.id', 'DESC')
+            ->get();
+
+        // dd($pickUpAreas);
+
+        return view('templates.pick-ups', compact([
+            'staffs',
+            'pickUpsData',
+            'pickUpAreas',
+            'schedules'
+        ]));
+    }
+
+    public function storePickUpsData(Request $request)
+    {
+        $request->validate([
+            'pick_up_name' => 'required|string',
+            'reg_number' => 'nullable|string',
+        ]);
+
+        $pickUpExists = DB::table('pickup_management')
+            ->where('pick_up_name', $request->pick_up_name)
+            ->where('reg_number', $request->reg_number)
+            ->where('soft_delete', 0)
+            ->exists();
+
+        if ($pickUpExists === true) {
+            return redirect()->back()->with('error', 'This pickup already sxists!');
+        }
+
+        DB::table('pickup_management')->insert([
+            'pick_up_name' => $request->pick_up_name,
+            'reg_number' => $request->reg_number,
+            'added_by' => Auth::user()->user_id,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Pick Up added successfully!');
+    }
+
+    public function storeSchedulesPickUp(Request $request)
+    {
+        $data = $request->validate([
+            'pickup_day' => 'required|date',
+            'pick_up_id' => 'required|integer',
+            'preferred_time' => 'nullable|string',
+            'location' => 'required|string',
+        ]);
+
+        $pickUpExsists = DB::table('pick_up_date_schedule')
+            ->where('pick_up_id', $request->pick_up_id)
+            ->where('location', $request->location)
+            ->where('pickup_day', $request->pickup_day)
+            ->exists();
+
+        if ($pickUpExsists == true) {
+            return redirect()->back()->with('error', 'Pick schedule for ' . ' ' . $request->location . ' ' . ' on' . ' ' . $request->pickup_day . ' ' . 'already available!');
+        }
+
+        DB::table('pick_up_date_schedule')->insert([
+            'pickup_day' => $request->pickup_day,
+            'pick_up_id' => $request->pick_up_id,
+            'preferred_time' => $request->preferred_time,
+            'location' => $request->location,
+            'staff_id' => Auth::user()->user_id,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Pick up schedule created successfully!');
+    }
+
     public function dashboard()
     {
         $myPickUpRequests = DB::table('waste_schedule_pickup')
@@ -61,7 +179,103 @@ class PageController extends Controller
 
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
         // dd($balance);
-        return view('templates.dashboard', compact('balance', 'myPickUpRequests', 'months','totals'));
+
+        $residentsCounter = DB::table('residents')->where('soft_delete', 0)->count();
+        $streetCounter = DB::table('waste_schedule_pickup')->select('location')->where('soft_delete', 0)->distinct()->count();
+        $requestsCounter = DB::table('waste_schedule_pickup')->where('soft_delete', 0)->count();
+        $collectionEarlings = DB::table('payments')->where('soft_delete', 0)->sum('amount');
+
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $dailyData = DB::table('waste_schedule_pickup')
+            ->where('soft_delete', 0)
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total_requests, COUNT(DISTINCT user_id) as total_residents')
+            ->groupByRaw('DATE(created_at)')
+            ->get()
+            ->keyBy('day');
+
+        $labels = [];
+        $requests = [];
+        $residents = [];
+
+        foreach (Carbon::now()->startOfWeek()->daysUntil(Carbon::now()->endOfWeek()) as $date) {
+            $dayName = $date->format('l');
+            $dayKey = $date->format('Y-m-d');
+
+            $labels[] = $dayName;
+            $requests[] = $dailyData[$dayKey]->total_requests ?? 0;
+            $residents[] = $dailyData[$dayKey]->total_residents ?? 0;
+        }
+
+        $weeklyStats = DB::table('waste_schedule_pickup AS PR')
+            ->join('residents AS R', 'PR.user_id', '=', 'R.id')
+            ->select([
+                'R.id AS residentId',
+                'R.name AS names',
+                'PR.location AS location',
+                DB::raw('COUNT(PR.id) AS totalRequests')
+            ])
+            ->whereBetween('PR.created_at', [$startOfWeek, $endOfWeek])
+            ->where('PR.soft_delete', 0)
+            ->groupBy('R.id', 'R.name', 'PR.location')
+            ->orderByDesc('totalRequests')
+            ->limit(4)
+            ->get();
+
+        $allStats = DB::table('waste_schedule_pickup AS PR')
+            ->join('residents AS R', 'PR.user_id', '=', 'R.id')
+            ->join('payments AS P', 'PR.id', '=', 'P.pick_up_id')
+            ->select([
+                'R.id AS residentId',
+                'R.name AS names',
+                'PR.location AS location',
+                DB::raw('MAX(PR.created_at) AS dueDate'),
+                DB::raw('SUM(P.amount) AS totalPaid'),
+                DB::raw('MAX(P.currency) AS currency'),
+                DB::raw('COUNT(PR.id) AS totalRequests')
+            ])
+            ->where('PR.soft_delete', 0)
+            ->groupBy('R.id', 'R.name', 'PR.location')
+            ->orderByDesc('totalRequests')
+            ->limit(10)
+            ->get();
+
+        $schedules = DB::table('pick_up_date_schedule AS PS')
+            ->join('pickup_management AS PM', 'PS.pick_up_id', '=', 'PM.id')
+            ->join('staff AS ST', 'PS.staff_id', '=', 'ST.id')
+            ->select([
+                'PM.pick_up_name AS pName',
+                'PS.pickup_day AS day',
+                'PS.preferred_time AS time',
+                'PS.location AS area',
+                'ST.names AS names',
+            ])
+            ->whereBetween('PS.created_at', [$startOfWeek, $endOfWeek])
+            ->where('PS.soft_delete', 0)
+            ->orderBy('PS.id', 'DESC')
+            ->get();
+
+        // dd($allStats);
+
+        return view('templates.dashboard', compact(
+            'balance',
+            'myPickUpRequests',
+            'months',
+            'totals',
+            'residentsCounter',
+            'streetCounter',
+            'requestsCounter',
+            'collectionEarlings',
+            'labels',
+            'requests',
+            'residents',
+            'weeklyStats',
+            'startOfWeek',
+            'endOfWeek',
+            'allStats','schedules',
+        ));
     }
 
     public function myWallet()
@@ -107,7 +321,10 @@ class PageController extends Controller
 
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
 
-        return view('templates.schedule-pickups', compact('myPickUpRequests', 'balance'));
+        return view('templates.schedule-pickups', compact(
+            'myPickUpRequests',
+            'balance',
+        ));
     }
 
     public function storeSchedules(Request $request)
@@ -206,7 +423,36 @@ class PageController extends Controller
         // dd($acceptedRequests);
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
 
-        return view('templates.pickup-requests', compact('incompeleteRequests', 'acceptedRequests', 'completedRequests', 'balance'));
+
+        $allRequestsCounter = DB::table('waste_schedule_pickup')
+            ->where('soft_delete', 0)
+            ->count();
+
+        $pendingRequestsCounter = DB::table('waste_schedule_pickup')
+            ->where('status', 'pending')
+            ->where('soft_delete', 0)
+            ->count();
+
+        $acceptedRequestsCounter = DB::table('waste_schedule_pickup')
+            ->where('status', 'accepted')
+            ->where('soft_delete', 0)
+            ->count();
+
+        $compltedRequestsCounter = DB::table('waste_schedule_pickup')
+            ->where('status', 'completed')
+            ->where('soft_delete', 0)
+            ->count();
+
+        return view('templates.pickup-requests', compact(
+            'incompeleteRequests',
+            'acceptedRequests',
+            'completedRequests',
+            'balance',
+            'allRequestsCounter',
+            'pendingRequestsCounter',
+            'acceptedRequestsCounter',
+            'compltedRequestsCounter',
+        ));
     }
 
     public function viewRequest($encryptedId)
@@ -382,5 +628,47 @@ class PageController extends Controller
         return redirect()->back()->with('success', 'Item added to the recyclable list successfully!');
 
         // dd($request->all());
+    }
+
+    public function transactions()
+    {
+        $allTransactionsCounter = DB::table('payments')
+            ->where('soft_delete', 0)
+            ->count();
+
+        $pendingTransactionsCounter = DB::table('payments')
+            ->where('soft_delete', 0)
+            ->where('status', null)
+            ->count();
+
+        $canclledTransactionsCounter = DB::table('payments')
+            ->whereNot('soft_delete', 0)
+            ->count();
+
+        $complteTransactionsCounter = DB::table('payments')
+            ->where('soft_delete', 0)
+            ->whereIn('status', ['approved', 'Paid'])
+            ->count();
+
+        $transactions = DB::table('payments')
+            ->select('*')
+            ->where('soft_delete', 0)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        $cancelledTransaction = DB::table('payments')
+            ->select('*')
+            ->whereNot('soft_delete', 0)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return view('templates.transactions', compact([
+            'allTransactionsCounter',
+            'pendingTransactionsCounter',
+            'canclledTransactionsCounter',
+            'complteTransactionsCounter',
+            'transactions',
+            'cancelledTransaction'
+        ]));
     }
 }

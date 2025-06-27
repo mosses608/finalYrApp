@@ -69,11 +69,13 @@
 
                             <li class="nav-item dropdown">
                                 <div class="row">
-                                    <div class="col-8">
-                                        <a href="{{ route('my.wallet') }}"
-                                            class="btn btn-primary p-2 mt-3 btn-sm">Wallet:
-                                            <strong>{{ $balance->currency . ' ' . number_format($balance->balance, 2) }}</strong></a>
-                                    </div>
+                                    @if (Auth::user()->user_type != 1)
+                                        <div class="col-8">
+                                            <a href="{{ route('my.wallet') }}"
+                                                class="btn btn-primary p-2 mt-3 btn-sm">Wallet:
+                                                <strong>{{ $balance->currency . ' ' . number_format($balance->balance, 2) }}</strong></a>
+                                        </div>
+                                    @endif
                                     <div class="col-4">
                                         <a class="nav-link " href="javascript:void(0)" id="drop2"
                                             data-bs-toggle="dropdown" aria-expanded="false">

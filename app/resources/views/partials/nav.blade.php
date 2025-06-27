@@ -31,7 +31,14 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('schedule.pickups.day') }}">
+                                <i class="ti ti-calendar-event"></i>
+                                <span class="hide-menu">Schedule Pickups</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('user.management') }}">
                                 <i class="ti ti-users"></i>
                                 <span class="hide-menu">User Management</span>
                             </a>
@@ -52,7 +59,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('transactions.view') }}">
                                 <i class="ti ti-currency-dollar"></i>
                                 <span class="hide-menu">Transactions</span>
                             </a>
@@ -75,6 +82,13 @@
                         <a class="sidebar-link" href="{{ route('dashboard') }}">
                             <i class="ti ti-dashboard"></i>
                             <span class="hide-menu">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#">
+                            <i class="ti ti-calendar-event"></i>
+                            <span class="hide-menu">Schedule Pickup</span>
                         </a>
                     </li>
 
