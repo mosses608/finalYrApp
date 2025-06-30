@@ -55,7 +55,7 @@
                                                 <td class="text-center">
                                                     <strong>{{ strtoupper($mypicks->frequency) }}</strong>
                                                 </td>
-                                                <td class="text-center">
+                                                <td class="text-start">
                                                     {{ $mypicks->location }}
                                                 </td>
 
@@ -148,7 +148,7 @@
                 <x-flash-messages />
                 <div class="row text-center">
                     <!-- Residents Counter -->
-                    <div class="col-md-3 mb-4">
+                    <a href="{{ route('residents.view') }}" class="col-md-3 mb-4">
                         <div class="card border-0 shadow-lg rounded-3 py-0">
                             <div class="card-body">
                                 <div class="row">
@@ -160,10 +160,10 @@
                                 <h3 class="fw-bold float-end fs-5">{{ number_format($residentsCounter) }}</h3>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Total Streets Counter -->
-                    <div class="col-md-3 mb-4">
+                    <a href="#" class="col-md-3 mb-4">
                         <div class="card border-0 shadow-lg rounded-3 py-0">
                             <div class="card-body">
                                 <div class="row">
@@ -175,10 +175,10 @@
                                 <h3 class="fw-bold float-end fs-5">{{ number_format($streetCounter) }}</h3>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Total Pickups Counter -->
-                    <div class="col-md-3 mb-4">
+                    <a href="{{ route('pickup.requests') }}" class="col-md-3 mb-4">
                         <div class="card border-0 shadow-lg rounded-3 py-0">
                             <div class="card-body">
                                 <div class="row">
@@ -190,10 +190,10 @@
                                 <h3 class="fw-bold float-end fs-5">{{ number_format($requestsCounter) }}</h3>
                             </div>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Today's Collection Counter -->
-                    <div class="col-md-3 mb-4">
+                    <a href="{{ route('transactions.view') }}" class="col-md-3 mb-4">
                         <div class="card border-0 shadow-lg rounded-3 py-0">
                             <div class="card-body">
                                 <div class="row">
@@ -206,7 +206,7 @@
                                     {{ number_format($collectionEarlings, 2) }}</h3>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 <!--  Row 1 -->

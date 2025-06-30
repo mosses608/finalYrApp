@@ -9,6 +9,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/verify-email', [App\Http\Controllers\Users\UserController::class, 'emailVerify'])->name('email.verify');
     Route::post('/verify-otp', [App\Http\Controllers\Users\UserController::class, 'otpVerify'])->name('verify.myEmail');
     Route::post('/authenticate', [App\Http\Controllers\Auth\AuthenticateController::class, 'auth'])->name('authenticate.user');
+    Route::get('/forgot-password', [App\Http\Controllers\Users\UserController::class, 'forgotPassword'])->name('forgot.password');
+    Route::post('/send-email', [App\Http\Controllers\Users\UserController::class, 'sendEmail'])->name('send.email');
+    Route::get('/change-password', [App\Http\Controllers\Users\UserController::class, 'changePassword'])->name('change.password');
+    Route::post('/password-reset', [App\Http\Controllers\Users\UserController::class, 'passwordResset'])->name('reset.password');
 });
 
 Route::middleware('auth')->group(function () {
@@ -27,11 +31,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/pick-up-schedule', [App\Http\Controllers\Pages\PageController::class, 'schedulePickUpDay'])->name('schedule.pickups.day');
     Route::post('/store-pick-ups', [App\Http\Controllers\Pages\PageController::class, 'storePickUpsData'])->name('store.pickups');
     Route::post('/store-schedules', [App\Http\Controllers\Pages\PageController::class, 'storeSchedulesPickUp'])->name('store.pickup.schedules');
-
+    Route::get('/contracts/{encryptedId}', [App\Http\Controllers\Pages\PageController::class, 'contracts'])->name('view.contracts');
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');
     Route::post('/store.staff', [App\Http\Controllers\Users\UserController::class, 'storeStaff'])->name('store.staff');
+    Route::get('/residents-view', [App\Http\Controllers\Users\UserController::class, 'viewResidents'])->name('residents.view');
 
 
     // PAYMENTS

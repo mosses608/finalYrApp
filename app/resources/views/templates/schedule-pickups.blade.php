@@ -153,7 +153,7 @@
                                                             <input type="text" name="location" id="location"
                                                                 class="form-control" placeholder="Tell us pickup location">
                                                         </div>
-                                                        <div class="col-md-4 mb-3">
+                                                        {{-- <div class="col-md-4 mb-3">
                                                             <label for="" class="form-label"></label>
                                                             <label for="location" class="form-label">Check here to use my
                                                                 location</label><br>
@@ -161,7 +161,7 @@
                                                                 <input type="checkbox" id="location" class=""
                                                                     name="mylocation" value="{{ Crypt::encrypt(1) }}">
                                                             </center>
-                                                        </div>
+                                                        </div> --}}
                                                     </div>
                                                     <!-- Submit Button -->
                                                     <button type="submit" class="btn btn-primary">Submit</button>

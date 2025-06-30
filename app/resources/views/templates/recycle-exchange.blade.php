@@ -4,7 +4,7 @@
     <div class="container-fluid">
         <x-flash-messages />
         <div class="row mb-3">
-            <div class="container py-4">
+            <div class="container py-1">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="fw-bold fs-5">♻️ Recycling Exchange</h2>
                     <button href="#" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal"
@@ -28,7 +28,10 @@
                                     <p class="fw-bold text-success">Price: $ {{ number_format($recyclable->price, 2) }} =>
                                         {{ number_format(\App\Services\CurrencyConverter::convertUsdToTsh($recyclable->price), 2) }}
                                         TZS </p>
-                                    <a href="#" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+                                        @php
+                                            $encryptedId = \Illuminate\Support\Facades\Crypt::encrypt($recyclable->id);
+                                        @endphp
+                                    <a href="{{ route('view.contracts', $encryptedId) }}" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
                                 </div>
                             </div>
                         </div>

@@ -274,7 +274,8 @@ class PageController extends Controller
             'weeklyStats',
             'startOfWeek',
             'endOfWeek',
-            'allStats','schedules',
+            'allStats',
+            'schedules',
         ));
     }
 
@@ -575,14 +576,15 @@ class PageController extends Controller
         $recyclables = DB::table('recyclables AS RS')
             ->join('recyclable_material_category AS RSC', 'RS.material_type', '=', 'RSC.id')
             ->join('residents AS R', 'RS.user_id', '=', 'R.id')
-            ->select([
+            ->select(
+                'RS.id AS id',
                 'RS.title AS materialName',
                 'RSC.name AS materialCategory',
                 'RS.weight AS weight',
                 'R.name AS listedBy',
                 'RS.price AS price',
                 'RS.image AS image',
-            ])
+            )
             ->where('RS.soft_delete', 0)
             ->orderByDesc('RS.id')
             ->get();
@@ -670,5 +672,11 @@ class PageController extends Controller
             'transactions',
             'cancelledTransaction'
         ]));
+    }
+
+    public function contracts()
+    {
+        $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
+        return view('templates.contracts', compact('balance'));
     }
 }

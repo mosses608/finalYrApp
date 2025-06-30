@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Http\Request;
 use App\Mail\EmailVerifyMail;
+use App\Mail\PasswordRestEmail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -161,9 +162,9 @@ class UserController extends Controller
             ->orderBy('S.names', 'ASC')
             ->get();
 
-            // dd($staffs);
+        // dd($staffs);
 
-        return view('templates.user-management', compact('roles','staffs'));
+        return view('templates.user-management', compact('roles', 'staffs'));
     }
 
     public function storeStaff(Request $request)
@@ -237,5 +238,127 @@ class UserController extends Controller
         // dd($validatedData);
 
         return redirect()->back()->with('success', 'New user registered successfully!');
+    }
+
+    public function viewResidents()
+    {
+        $residents = DB::table('residents')
+            ->select('*')
+            ->where('soft_delete', 0)
+            ->orderBy('name', 'ASC')
+            ->get();
+        return view('templates.residents-view', compact('residents'));
+    }
+
+    public function forgotPassword()
+    {
+        return view('templates.forgot-password');
+    }
+
+    public function sendEmail(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+        ]);
+
+        $user = DB::table('users')
+            ->where('username', $request->username)
+            ->where('soft_delete', 0)
+            ->first();
+
+        if (!$user) {
+            return redirect()->back()->with('error', 'User does not exist!');
+        }
+
+        $resident = DB::table('residents')
+            ->select('email')
+            ->where('id', $user->user_id)
+            ->where('soft_delete', 0)
+            ->first();
+
+        if (!$resident) {
+            return redirect()->back()->with('error', 'Resident does not exist!');
+        }
+
+        $otp = random_int(1000, 9999);
+
+        $userExist = DB::table('password_reset_tokens')->where('email', $resident->email)->first();
+
+        if (!$userExist) {
+            DB::table('password_reset_tokens')->insert([
+                'email' => $resident->email,
+                'token' => Hash::make($otp),
+                'created_at' => Carbon::now(),
+            ]);
+        } else {
+            DB::table('password_reset_tokens')->where('email', $resident->email)->update([
+                'token' => Hash::make($otp),
+                'created_at' => Carbon::now(),
+            ]);
+        }
+
+        $residentEmail = $resident->email;
+
+        // dd($residentEmail);
+
+        Mail::to($residentEmail)->send(new PasswordRestEmail($otp, $residentEmail));
+
+        $maskedEmail = substr($residentEmail, 0, 4) . '******' . substr($residentEmail, -10);
+
+        return redirect()->back()->with('success', 'Rest link has been sent to an email.' . ' ' . $maskedEmail);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $token = $request->query('otp');
+        $email = $request->query('email');
+        return view('templates.changepassword', compact([
+            'token',
+            'email',
+        ]));
+    }
+
+    public function passwordResset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string',
+            'token' => 'required|string',
+            'password' => 'required|string',
+            'password_reset' => 'required|string',
+        ]);
+
+        // dd($request->all());
+
+        if ($request->password != $request->password_reset) {
+            return redirect()->back()->with('error', 'Passwords do not match!');
+        }
+
+        $decryptedEmail = Crypt::decrypt($request->email);
+        $decryptedToken = Crypt::decrypt($request->token);
+
+        // dd($decryptedToken);
+
+        $authUser = DB::table('users')->where('username', $decryptedEmail)->where('soft_delete', 0)->first();
+
+        if (Hash::check($request->password, $authUser->password)) {
+            return redirect()->back()->with('error', 'New password can not be same a old password!');
+        }
+
+        $userExists = DB::table('password_reset_tokens')
+            ->where('email', $decryptedEmail)
+            ->first();
+
+        if ($userExists) {
+            if (Hash::check($decryptedToken, $userExists->token)) {
+                DB::table('users')->where('username', $decryptedEmail)->update([
+                    'password' => Hash::make($request->password),
+                ]);
+
+                DB::table('password_reset_tokens')
+                    ->where('email', $decryptedEmail)->delete();
+            }
+        }
+
+        return redirect('/')->with('success', 'Password changed successfully!. You can now login');
     }
 }
