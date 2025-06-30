@@ -18,8 +18,8 @@
                                     <form action="{{ route('reset.password') }}" method="POST">
                                         @csrf
                                         <div class="mb-3">
-                                            <input type="text" name="email" id="" value="{{ \Illuminate\Support\Facades\Crypt::encrypt($email) }}">
-                                            <input type="text" name="token" id="" value="{{ $token }}">
+                                            <input type="hidden" name="email" id="" value="{{ \Illuminate\Support\Facades\Crypt::encrypt($email) }}">
+                                            <input type="hidden" name="token" id="" value="{{ $token }}">
                                             <label for="exampleInputEmail1" class="d-flex"><strong>New
                                                     Password</strong></label>
                                             <input type="password" class="form-control" id="exampleInputEmail1"
