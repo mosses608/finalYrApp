@@ -23,14 +23,14 @@
                                             <label for="exampleInputEmail1" class="d-flex"><strong>New
                                                     Password</strong></label>
                                             <input type="password" class="form-control" id="exampleInputEmail1"
-                                                name="password" placeholder="Enter new password">
+                                                name="password" placeholder="Enter new password" autocomplete="off" required>
                                         </div>
 
                                         <div class="mb-3">
                                             <label for="exampleInputEmail1" class="d-flex"><strong>Confirm New
                                                     Password</strong></label>
                                             <input type="password" class="form-control" id="exampleInputEmail1"
-                                                name="password_reset" placeholder="Re-enter password">
+                                                name="password_reset" placeholder="Re-enter password" autocomplete="off" required>
                                         </div>
 
                                         <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Rest

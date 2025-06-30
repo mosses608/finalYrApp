@@ -19,7 +19,7 @@
                                         @csrf
                                         <div class="mb-3">
                                             <label for="exampleInputEmail1" class="d-flex"><strong>Username</strong></label>
-                                            <input type="email" class="form-control" id="exampleInputEmail1" name="username" placeholder="Enter username or email">
+                                            <input type="email" class="form-control" id="exampleInputEmail1" name="username" placeholder="Enter username or email" autocomplete="off" required>
                                         </div>
                                        
                                         <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Next</button>
