@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Pages;
 
+use Carbon\Carbon;
+use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use App\Services\CurrencyConverter;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\BlockchainSimulator;
+use Illuminate\Support\Facades\Crypt;
 
 class PageController extends Controller
 {
@@ -674,9 +676,68 @@ class PageController extends Controller
         ]));
     }
 
-    public function contracts()
+    public function contracts($encryptedId)
     {
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
-        return view('templates.contracts', compact('balance'));
+        $id = Crypt::decrypt($encryptedId);
+
+        $recyclable = DB::table('recyclables')->where('id', $id)->first();
+
+        $contractData = [
+            'recyclable_id' => $recyclable->id,
+            'buyer_id' => Auth::id(),
+            'seller_id' => $recyclable->user_id,
+            'price_usd' => $recyclable->price,
+        ];
+
+        $sellerData = DB::table('residents')->where('id', $recyclable->user_id)->first();
+
+        $userData = DB::table('residents')->where('id', Auth::user()->id)->first();
+
+        $block = BlockchainSimulator::createBlock($contractData);
+
+        $contract = Contract::create(array_merge($contractData, [
+            'status' => 'Pending',
+            'blockchain_data' => json_encode($block)
+        ]));
+
+        return view('templates.contracts', compact('balance', 'contract', 'recyclable', 'userData', 'sellerData'));
+    }
+
+    public function createContract(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|string',
+            'recyclable_id' => 'required|string',
+            'price' => 'required|string',
+        ]);
+
+        $price = Crypt::decrypt($request->price);
+        $contractId = Crypt::decrypt($request->id);
+        $recyclableId = Crypt::decrypt($request->recyclable_id);
+
+        // dd($recyclableId);
+
+        if (DB::table('contracts')->where('id', $contractId)->where('recyclable_id', $recyclableId)->exists() === true) {
+            return redirect()->back()->with('error', 'Contract already exists!');
+        }
+
+        DB::table('contracts')->where('id', $contractId)->update([
+            'status' => 'Approved',
+        ]);
+
+        $user = DB::table('recyclables')->where('id', $recyclableId)->first();
+
+        $amountInTSH = CurrencyConverter::convertUsdToTsh($price);
+
+        $userWallet = DB::table('wallets')->where('user_id', $user->user_id)->first();
+
+        $availableBalance = $userWallet->balance;
+
+        DB::table('wallets')->where('user_id', $user->user_id)->update([
+            'balance' => $availableBalance + $amountInTSH,
+        ]);
+
+        return redirect()->back()->with('success', 'Data saved successfully!');
     }
 }

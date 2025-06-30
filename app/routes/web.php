@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/store-pick-ups', [App\Http\Controllers\Pages\PageController::class, 'storePickUpsData'])->name('store.pickups');
     Route::post('/store-schedules', [App\Http\Controllers\Pages\PageController::class, 'storeSchedulesPickUp'])->name('store.pickup.schedules');
     Route::get('/contracts/{encryptedId}', [App\Http\Controllers\Pages\PageController::class, 'contracts'])->name('view.contracts');
+    Route::post('/contract-create', [App\Http\Controllers\Pages\PageController::class, 'createContract'])->name('contract.approve');
+
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');
