@@ -340,7 +340,7 @@ class PageController extends Controller
             'mylocation' => 'nullable|string|max:255',
         ]);
 
-        $userId = Auth::user()->id;
+        $userId = Auth::user()->user_id;
 
         // $duplicatedRequest = DB::table('waste_schedule_pickup')->where('')
 
