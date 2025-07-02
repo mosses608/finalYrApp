@@ -1,5 +1,6 @@
 @extends('layouts.app')
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 @section('content')
     <div class="container-fluid">
         <x-flash-messages />
@@ -58,7 +59,7 @@
                                 <h6 class="text-muted mb-0">Completed</h6>
                             </div>
                         </div>
-                        <h3 class="fw-bold float-end fs-5">{{  number_format($compltedRequestsCounter)}}</h3>
+                        <h3 class="fw-bold float-end fs-5">{{ number_format($compltedRequestsCounter) }}</h3>
                     </div>
                 </div>
             </div>
@@ -297,9 +298,9 @@
                                             @if (count($completedRequests) == 0)
                                                 <span class="p-2 mt-5">No requests found completed!</span>
                                             @endif
+
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

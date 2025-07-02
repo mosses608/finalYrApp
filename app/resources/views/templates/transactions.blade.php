@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
     <div class="container-fluid">
         <x-flash-messages />
@@ -84,7 +83,8 @@
                                     <div class="tab-pane fade show active" id="nav-pick-up-list" role="tabpanel"
                                         aria-labelledby="nav-profile-tab">
                                         <div class="table-responsive mt-0">
-                                            <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
+                                            <table class="table mb-0 text-nowrap varient-table align-middle fs-3"
+                                                id="table-responsive1">
                                                 <thead>
                                                     <tr>
                                                         <th scope="col" class="px-0 text-muted">
@@ -142,6 +142,14 @@
                                             </table>
 
                                         </div>
+                                        @if (count($transactions) > 0)
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <button class="btn btn-primary float-end"><i class="ti ti-download"></i>
+                                                        Download</button>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div class="tab-pane fade" id="nav-accepted-requests" role="tabpanel"
@@ -188,8 +196,15 @@
                                                     @endforeach
                                                 </tbody>
                                             </table>
-
                                         </div>
+                                        @if (count($cancelledTransaction) > 0)
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <button class="btn btn-primary float-end"><i class="ti ti-download"></i>
+                                                        Download</button>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

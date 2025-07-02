@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login | Welcome</title>
-    {{-- <link rel="shortcut icon" type="image/png" href="./assets/images/logos/favicon.png" /> --}}
+    <title>Blockchain-Integrated | Waste System</title>
+    <link rel="shortcut icon" type="image/png" href="{{ asset('/assets/images/logos/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 </head>
 
 <body>
@@ -77,8 +78,8 @@
                                         </div>
                                     @endif
                                     <div class="col-4">
-                                        <a class="nav-link " href="javascript:void(0)" id="drop2"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <a class="nav-link " href="{{ route('profile') }}" id="drop2"
+                                            >
                                             <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
                                                 width="35" height="35" class="rounded-circle">
                                         </a>
@@ -118,6 +119,9 @@
     </div>
 
 </body>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 <!-- solar icons -->

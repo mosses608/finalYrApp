@@ -1,5 +1,11 @@
 @extends('layouts.app')
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+    #map {
+        height: 500px;
+    }
+</style>
 @section('content')
     <div class="container-fluid">
         <x-flash-messages />
@@ -131,11 +137,18 @@
                                                             </select>
                                                         </div>
 
+                                                        @php
+                                                            $today = \Carbon\Carbon::now()->format('Y-m-d');
+                                                        @endphp
+
                                                         <!-- Pickup Date -->
                                                         <div class="col-md-4 mb-3">
                                                             <label for="pickup_date" class="form-label">Pickup Date</label>
-                                                            <input type="date" name="pickup_date" id="pickup_date"
-                                                                class="form-control" required>
+                                                            <input type="date" name="pickup_date"
+                                                                min="{{ $today }}" id="pickup_date"
+                                                                class="form-control"
+                                                                value="{{ old('pickup_date', \Carbon\Carbon::now()->format('Y-m-d')) }}"
+                                                                required>
                                                         </div>
 
                                                         <!-- Preferred Time -->
@@ -148,10 +161,11 @@
 
                                                         <!-- Location -->
                                                         <div class="col-md-4 mb-3">
-                                                            <label for="location" class="form-label">Location | Or Use my
-                                                                location</label>
+                                                            <label for="location" class="form-label">Location
+                                                            </label>
                                                             <input type="text" name="location" id="location"
-                                                                class="form-control" placeholder="Tell us pickup location">
+                                                                class="form-control" placeholder="Tell us pickup location"
+                                                                value="{{ $address }}">
                                                         </div>
                                                         {{-- <div class="col-md-4 mb-3">
                                                             <label for="" class="form-label"></label>
@@ -167,6 +181,9 @@
                                                     <button type="submit" class="btn btn-primary">Submit</button>
                                                 </div>
                                         </form>
+                                        <hr>
+                                        <p class="text-primary">My Location {{ $address }}</p>
+                                        <div id="map"></div>
                                     </div>
                                 </div>
                             </div>
@@ -175,4 +192,32 @@
                 </div>
             </div>
         </div>
-    @endsection
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let address = @json($address);
+
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const lat = data[0].lat;
+                            const lon = data[0].lon;
+
+                            const map = L.map('map').setView([lat, lon], 15);
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; All Rights Reserved'
+                            }).addTo(map);
+
+                            L.marker([lat, lon]).addTo(map)
+                                .bindPopup(`<b>${address}</b>`)
+                                .openPopup();
+                        } else {
+                            alert('Location not found.');
+                        }
+                    })
+                    .catch(error => console.error('Geocoding error:', error));
+            });
+        </script>
+    </div>
+@endsection

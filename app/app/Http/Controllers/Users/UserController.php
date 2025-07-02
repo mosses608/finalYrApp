@@ -361,4 +361,53 @@ class UserController extends Controller
 
         return redirect('/')->with('success', 'Password changed successfully!. You can now login');
     }
+
+    public function profile()
+    {
+        $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
+        $resident = DB::table('residents')
+            ->where('id', Auth::user()->user_id)
+            ->first();
+        return view('templates.profile', compact('balance', 'resident'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|string',
+            'name' => 'required|string',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
+            'email' => 'required|string',
+            // 'password' => 'nullable|string',
+        ]);
+
+        try {
+            $decryptedId = Crypt::decrypt($request->user_id);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        $userExists = DB::table('residents')
+            ->where('id', $decryptedId)
+            ->exists();
+
+        if($userExists == false){
+            return redirect()->back()->with('error','Error!, User not found!');
+        }
+
+        try {
+            DB::table('residents')->where('id', $decryptedId)
+            ->update([
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'email' => $request->email,
+            ]);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return redirect()->back()->with('success','Profile updated successfuly!');
+    }
 }

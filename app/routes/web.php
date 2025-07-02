@@ -33,12 +33,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/store-schedules', [App\Http\Controllers\Pages\PageController::class, 'storeSchedulesPickUp'])->name('store.pickup.schedules');
     Route::get('/contracts/{encryptedId}', [App\Http\Controllers\Pages\PageController::class, 'contracts'])->name('view.contracts');
     Route::post('/contract-create', [App\Http\Controllers\Pages\PageController::class, 'createContract'])->name('contract.approve');
-
+    Route::get('/pickup-locations', [App\Http\Controllers\Pages\PageController::class, 'pickUpLocations'])->name('pickup.locations');
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');
     Route::post('/store.staff', [App\Http\Controllers\Users\UserController::class, 'storeStaff'])->name('store.staff');
     Route::get('/residents-view', [App\Http\Controllers\Users\UserController::class, 'viewResidents'])->name('residents.view');
+    Route::get('/profile', [App\Http\Controllers\Users\UserController::class, 'profile'])->name('profile');
+    Route::put('/update-profile', [App\Http\Controllers\Users\UserController::class, 'updateProfile'])->name('update.profile');
 
 
     // PAYMENTS

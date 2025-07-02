@@ -66,7 +66,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('pickup.locations') }}">
                                 <i class="ti ti-link"></i>
                                 <span class="hide-menu">Blockchain Ledger</span>
                             </a>

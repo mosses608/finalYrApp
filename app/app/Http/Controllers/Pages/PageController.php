@@ -322,11 +322,16 @@ class PageController extends Controller
             ->get();
         // dd($myPickUpRequests);
 
+        // $address = 'Dar es salaam Kigamboni Ferry';
+
+        $address = DB::table('residents')->select('address')->where('id', Auth::user()->user_id)->value('address');
+
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
 
         return view('templates.schedule-pickups', compact(
             'myPickUpRequests',
             'balance',
+            'address',
         ));
     }
 
@@ -456,6 +461,35 @@ class PageController extends Controller
             'acceptedRequestsCounter',
             'compltedRequestsCounter',
         ));
+    }
+
+    public function pickUpLocations()
+    {
+        $completedRequests = DB::table('waste_schedule_pickup AS IPR')
+            ->join('residents AS R', 'IPR.user_id', '=', 'R.id')
+            ->select([
+                'R.name AS name',
+                'IPR.pickup_date AS pickupDate',
+                'IPR.preferred_time AS pickupTime',
+                'IPR.frequency AS frequency',
+                'IPR.location AS pickupLocation',
+                'IPR.status AS status',
+                'IPR.id AS id',
+            ])
+            ->where('IPR.status', 'completed')
+            ->where('IPR.soft_delete', 0)
+            ->orderByDesc('IPR.id')
+            ->get();
+
+        // SET REQUEST FOR THIS WEEK
+
+        $locations = $completedRequests->pluck('pickupLocation')->filter()
+            ->unique()
+            ->values();
+
+        $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
+
+        return view('templates.pickup-locations', compact('balance','locations'));
     }
 
     public function viewRequest($encryptedId)
