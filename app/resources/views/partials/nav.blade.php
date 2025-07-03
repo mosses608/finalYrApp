@@ -24,9 +24,9 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('prediction.reports') }}">
                                 <i class="ti ti-chart-bar"></i>
-                                <span class="hide-menu">Analytics & Reports</span>
+                                <span class="hide-menu">Analytics & Predictions</span>
                             </a>
                         </li>
 
@@ -68,7 +68,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="{{ route('pickup.locations') }}">
                                 <i class="ti ti-link"></i>
-                                <span class="hide-menu">Blockchain Ledger</span>
+                                <span class="hide-menu">PickUp Locations</span>
                             </a>
                         </li>
                     </ul>

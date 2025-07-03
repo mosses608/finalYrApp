@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/contracts/{encryptedId}', [App\Http\Controllers\Pages\PageController::class, 'contracts'])->name('view.contracts');
     Route::post('/contract-create', [App\Http\Controllers\Pages\PageController::class, 'createContract'])->name('contract.approve');
     Route::get('/pickup-locations', [App\Http\Controllers\Pages\PageController::class, 'pickUpLocations'])->name('pickup.locations');
+    Route::get('/push-notifications', [App\Http\Controllers\Pages\PageController::class, 'pushNotifications'])->name('push.notifications');
+    Route::get('/prediction-reports', [App\Http\Controllers\Pages\PageController::class, 'runPrediction'])->name('prediction.reports');
+
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');

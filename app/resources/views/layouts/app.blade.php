@@ -9,6 +9,7 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('/assets/images/logos/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://js.pusher.com/beams/2.1.0/push-notifications-cdn.js"></script>
 </head>
 
 <body>
@@ -78,8 +79,7 @@
                                         </div>
                                     @endif
                                     <div class="col-4">
-                                        <a class="nav-link " href="{{ route('profile') }}" id="drop2"
-                                            >
+                                        <a class="nav-link " href="{{ route('profile') }}" id="drop2">
                                             <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
                                                 width="35" height="35" class="rounded-circle">
                                         </a>
@@ -150,5 +150,15 @@
         } */
     }
 </style>
+
+<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+
+<script>
+    Echo.private('user.{{ Auth::id() }}')
+        .notification((notification) => {
+            alert(notification.title + ": " + notification.body);
+        });
+</script>
+
 
 </html>

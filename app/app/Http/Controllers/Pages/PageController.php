@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use Carbon\Carbon;
 use App\Models\Contract;
+use App\Models\Resident;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\CurrencyConverter;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Services\BlockchainSimulator;
 use Illuminate\Support\Facades\Crypt;
+use App\Notifications\PickupReminderNotification;
 
 class PageController extends Controller
 {
@@ -482,14 +484,16 @@ class PageController extends Controller
             ->get();
 
         // SET REQUEST FOR THIS WEEK
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
 
-        $locations = $completedRequests->pluck('pickupLocation')->filter()
+        $locations = $completedRequests->whereBetween('IPR.created_at', [$startOfWeek, $endOfWeek])->pluck('pickupLocation')->filter()
             ->unique()
             ->values();
 
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
 
-        return view('templates.pickup-locations', compact('balance','locations'));
+        return view('templates.pickup-locations', compact('balance', 'locations'));
     }
 
     public function viewRequest($encryptedId)
@@ -773,5 +777,50 @@ class PageController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Data saved successfully!');
+    }
+
+    public function predictionReports()
+    {
+        $data = DB::table('recyclables AS RS')
+            ->join('recyclable_material_category AS MT', 'RS.material_type', '=', 'MT.id')
+            ->selectRaw("
+            DATE_FORMAT(RS.created_at, '%Y-%m') AS month,
+            SUM(RS.weight) AS total_weight,
+            RS.title AS title,
+            MT.name AS material_name
+        ")
+            ->where('RS.soft_delete', 0)
+            ->groupByRaw("DATE_FORMAT(RS.created_at, '%Y-%m'), RS.title, MT.name")
+            ->orderByRaw("DATE_FORMAT(RS.created_at, '%Y-%m')")
+            ->get();
+
+        $jsonPath = storage_path('app/waste_data.json');
+        file_put_contents($jsonPath, json_encode($data));
+
+        return response()->json(['message' => 'Data exported for prediction.']);
+    }
+
+    public function runPrediction()
+    {
+        $this->predictionReports();
+        $output = shell_exec("python predict_waste.py");
+        $predictedData = json_decode(file_get_contents(storage_path('app/waste_data.json')), true);
+
+        return view(
+            'templates.prediction-reports',
+            ['predictions' => $predictedData],
+        );
+    }
+
+    public function pushNotifications()
+    {
+        $users = Resident::join('waste_schedule_pickup AS WSP', 'residents.id', '=', 'WSP.user_id')
+            ->whereNotBetween('WSP.created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+            ->select('residents.*', 'WSP.pickup_date', 'WSP.preferred_time', 'WSP.location')
+            ->get();
+
+        foreach ($users as $user) {
+            $user->notify(new PickupReminderNotification($user));
+        }
     }
 }
