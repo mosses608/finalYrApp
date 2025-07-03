@@ -71,6 +71,12 @@
                                 <span class="hide-menu">PickUp Locations</span>
                             </a>
                         </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('push.notifications') }}">
+                                <i class="ti ti-bell"></i>
+                                <span class="hide-menu">Push Notifications</span>
+                            </a>
+                        </li>
                     </ul>
                 @endif
             @endif

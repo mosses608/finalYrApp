@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pickup-locations', [App\Http\Controllers\Pages\PageController::class, 'pickUpLocations'])->name('pickup.locations');
     Route::get('/push-notifications', [App\Http\Controllers\Pages\PageController::class, 'pushNotifications'])->name('push.notifications');
     Route::get('/prediction-reports', [App\Http\Controllers\Pages\PageController::class, 'runPrediction'])->name('prediction.reports');
+    Route::get('/notification-center', [App\Http\Controllers\Pages\PageController::class, 'notificationCenter'])->name('push.notifications');
+    Route::post('/notifications', [App\Http\Controllers\Pages\PageController::class, 'setNotifications'])->name('set.reminders');
 
 
     // USER MGT

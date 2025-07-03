@@ -6,11 +6,13 @@ use Carbon\Carbon;
 use App\Models\Contract;
 use App\Models\Resident;
 use Illuminate\Http\Request;
+use App\Mail\PickUpReminderEmail;
 use Illuminate\Support\Facades\DB;
 use App\Services\CurrencyConverter;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Services\BlockchainSimulator;
 use Illuminate\Support\Facades\Crypt;
 use App\Notifications\PickupReminderNotification;
@@ -810,6 +812,56 @@ class PageController extends Controller
             'templates.prediction-reports',
             ['predictions' => $predictedData],
         );
+    }
+
+    public function notificationCenter()
+    {
+        $startOfWeek = Carbon::now()->startOfWeek()->format('M d, Y');
+        $endOfWeek = Carbon::now()->endOfWeek()->format('M d, Y');
+        return view('templates.notofication-center', compact([
+            'startOfWeek',
+            'endOfWeek',
+        ]));
+    }
+
+    public function setNotifications(Request $request)
+    {
+        $request->validate([
+            // 'email' => 'required|string',
+            'title' => 'required|string',
+            'message_body' => 'required|string',
+        ]);
+
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $residentsData = DB::table('waste_schedule_pickup AS WSP')
+            ->join('residents AS RS', 'WSP.user_id', '=', 'RS.id')
+            ->whereBetween('WSP.pickup_date', [$startOfWeek, $endOfWeek])
+            ->where('WSP.status', 'completed')
+            ->get();
+
+        foreach ($residentsData as $data) {
+            $email = $data->email;
+            $pickUpDate = Carbon::parse($data->pickup_date)->format('M d, Y (l)') . ' ' . Carbon::parse($data->preferred_time)->format('H:i A');
+
+            $title = $request->title;
+            $body = $request->message_body;
+
+            if (Carbon::now()->diffInDays($data->pickup_date) <= 1) {
+
+                DB::table('notifications_reminders')->insert([
+                    'email' => $email,
+                    'title' => $request->title,
+                    'message_body' => $request->message_body,
+                    'sent_by' => Auth::user()->id,
+                ]);
+
+                Mail::to($email)->send(new PickUpReminderEmail($email, $pickUpDate, $title, $body));
+            }
+        }
+
+        return redirect()->back()->with('success','Notification sent successfully!');
     }
 
     public function pushNotifications()
