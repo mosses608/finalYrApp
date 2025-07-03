@@ -38,7 +38,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/prediction-reports', [App\Http\Controllers\Pages\PageController::class, 'runPrediction'])->name('prediction.reports');
     Route::get('/notification-center', [App\Http\Controllers\Pages\PageController::class, 'notificationCenter'])->name('push.notifications');
     Route::post('/notifications', [App\Http\Controllers\Pages\PageController::class, 'setNotifications'])->name('set.reminders');
-
+    Route::get('/transaction-download', [App\Http\Controllers\Pages\PageController::class, 'downloadPDF'])->name('transactions.pdf');
+    Route::get('/complaints', [App\Http\Controllers\Pages\PageController::class, 'complaints'])->name('complaints');
+    Route::post('/send-complaints', [App\Http\Controllers\Pages\PageController::class, 'saveComplainnts'])->name('send.complaints');
+    Route::get('/manage-complaints', [App\Http\Controllers\Pages\PageController::class, 'manageComplaints'])->name('manage.complaints');
+    Route::put('/send-feedbacks', [App\Http\Controllers\Pages\PageController::class, 'sendFeedbacks'])->name('send.feedbacks');
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');

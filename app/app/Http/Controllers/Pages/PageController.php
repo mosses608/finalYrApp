@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Contract;
 use App\Models\Resident;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Mail\PickUpReminderEmail;
 use Illuminate\Support\Facades\DB;
 use App\Services\CurrencyConverter;
@@ -674,7 +675,7 @@ class PageController extends Controller
         // dd($request->all());
     }
 
-    public function transactions()
+    public function transactions(Request $request)
     {
         $allTransactionsCounter = DB::table('payments')
             ->where('soft_delete', 0)
@@ -699,6 +700,18 @@ class PageController extends Controller
             ->where('soft_delete', 0)
             ->orderBy('id', 'DESC')
             ->get();
+
+        if ($request->has('searchFrom') && $request->has('searchTo') && $request->searchFrom != null && $request->searchTo != null) {
+            $fromDate = $request->searchFrom;
+            $toDate = $request->searchTo;
+
+            $transactions = DB::table('payments')
+                ->select('*')
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->where('soft_delete', 0)
+                ->orderBy('id', 'DESC')
+                ->get();
+        }
 
         $cancelledTransaction = DB::table('payments')
             ->select('*')
@@ -861,7 +874,7 @@ class PageController extends Controller
             }
         }
 
-        return redirect()->back()->with('success','Notification sent successfully!');
+        return redirect()->back()->with('success', 'Notification sent successfully!');
     }
 
     public function pushNotifications()
@@ -874,5 +887,100 @@ class PageController extends Controller
         foreach ($users as $user) {
             $user->notify(new PickupReminderNotification($user));
         }
+    }
+
+    public function downloadPDF(Request $request)
+    {
+        $transactions = DB::table('payments')
+            ->select('*')
+            ->get();
+
+        if ($request->has('searchFrom') && $request->has('searchTo') && $request->searchFrom != null && $request->searchTo != null) {
+            $fromDate = $request->searchFrom;
+            $toDate = $request->searchTo;
+
+            $transactions = DB::table('payments')
+                ->select('*')
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->where('soft_delete', 0)
+                ->orderBy('id', 'DESC')
+                ->get();
+        }
+
+        $pdf = Pdf::loadView('templates.pdf-transactions', compact('transactions'));
+        return $pdf->download('transactions.pdf');
+    }
+
+    public function complaints()
+    {
+        $complaints = DB::table('complaints')
+            ->select('complaints', 'responses', 'created_at', 'updated_at')
+            ->where('soft_delete', 0)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
+        return view('templates.complaints', compact([
+            'balance',
+            'complaints'
+        ]));
+    }
+
+    public function saveComplainnts(Request $request)
+    {
+        $request->validate([
+            'complaints' => 'required|string',
+        ]);
+
+        // $wordLength = $request->complaints.length;
+
+        // if($wordLength > 255){
+        //     return redirect()->back()->with('error','Minimun words requiredis 255');
+        // }
+
+        DB::table('complaints')->insert([
+            'user_id' => Auth::user()->user_id,
+            'complaints' => $request->complaints,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Complaint sent successfully, please wait for responses from our help desk!');
+    }
+
+    public function manageComplaints()
+    {
+        $complaints = DB::table('complaints')
+            ->select('complaints', 'responses', 'created_at', 'updated_at', 'id')
+            ->where('soft_delete', 0)
+            ->orderBy('id', 'DESC')
+            ->get();
+        return view('templates.manage-complaints', compact('complaints'));
+    }
+
+    public function sendFeedbacks(Request $request)
+    {
+        $request->validate([
+            'complaint_id' => 'required|string',
+            'responses' => 'required|string',
+        ]);
+
+        try {
+            $decryptedId = Crypt::decrypt($request->complaint_id);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        $dataExists = DB::table('complaints')
+        ->where('id', $decryptedId)->exists();
+
+        if($dataExists === true){
+            DB::table('complaints')
+            ->where('id', $decryptedId)->update([
+                'responses' => $request->responses,
+            ]);
+        }
+
+        return redirect()->back()->with('success','Feedbacks sent successfully!');
     }
 }

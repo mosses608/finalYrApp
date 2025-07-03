@@ -9,7 +9,6 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 data_path = os.path.join(project_root, 'storage', 'app', 'waste_data.json')
 output_path = os.path.join(project_root, 'storage', 'app', 'waste_data.json')
 
-# Read input data
 print(f"🔄 Reading data from: {data_path}")
 data = pd.read_json(data_path)
 

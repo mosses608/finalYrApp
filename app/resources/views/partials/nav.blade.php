@@ -45,7 +45,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('manage.complaints') }}">
                                 <i class="ti ti-settings"></i>
                                 <span class="hide-menu">Manage Complaints</span>
                             </a>
@@ -132,12 +132,12 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item">
+                        {{-- <li class="sidebar-item">
                             <a class="sidebar-link" href="#">
                                 <i class="ti ti-book"></i>
                                 <span class="hide-menu">Segregation Tips</span>
                             </a>
-                        </li>
+                        </li> --}}
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="{{ route('recycle.exchange') }}">
@@ -146,26 +146,26 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item">
+                        {{-- <li class="sidebar-item">
                             <a class="sidebar-link" href="#">
                                 <i class="ti ti-gift"></i>
                                 <span class="hide-menu">Rewards</span>
                             </a>
-                        </li>
+                        </li> --}}
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('complaints') }}">
                                 <i class="ti ti-message-report"></i>
                                 <span class="hide-menu">Complaints</span>
                             </a>
                         </li>
 
-                        <li class="sidebar-item">
+                        {{-- <li class="sidebar-item">
                             <a class="sidebar-link" href="#">
                                 <i class="ti ti-alert-triangle"></i>
                                 <span class="hide-menu">Emergency Alerts</span>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 @endif
             @endif

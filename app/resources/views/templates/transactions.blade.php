@@ -83,6 +83,30 @@
                                     <div class="tab-pane fade show active" id="nav-pick-up-list" role="tabpanel"
                                         aria-labelledby="nav-profile-tab">
                                         <div class="table-responsive mt-0">
+                                            <form action="{{ route('transactions.view') }}" method="GET">
+                                                <div class="card p-3">
+                                                    <center>
+                                                        <div class="row col-12">
+                                                            <div class="col-5">
+                                                                <input type="date" name="searchFrom"
+                                                                    class="form-control"id=""
+                                                                    max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
+                                                                    value="{{ old('searchFrom', \Carbon\Carbon::now()->format('Y-m-d')) }}">
+                                                            </div>
+                                                            <div class="col-5">
+                                                                <input type="date" name="searchTo"
+                                                                    class="form-control"id=""
+                                                                    max="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
+                                                                    value="{{ old('searchTo', \Carbon\Carbon::now()->format('Y-m-d')) }}">
+                                                            </div>
+                                                            <div class="col-2">
+                                                                <button type="submit"
+                                                                    class="btn btn-primary">Search</button>
+                                                            </div>
+                                                        </div>
+                                                    </center>
+                                                </div>
+                                            </form>
                                             <table class="table mb-0 text-nowrap varient-table align-middle fs-3"
                                                 id="table-responsive1">
                                                 <thead>
@@ -141,12 +165,16 @@
                                                 </tbody>
                                             </table>
 
+                                            @if (count($transactions) === 0)
+                                                <span class="text-primary">No data found!</span>
+                                            @endif
+
                                         </div>
                                         @if (count($transactions) > 0)
                                             <div class="row mt-4">
                                                 <div class="col-12">
-                                                    <button class="btn btn-primary float-end"><i class="ti ti-download"></i>
-                                                        Download</button>
+                                                    <a href="{{ route('transactions.pdf') }}" class="btn btn-primary float-end"><i class="ti ti-download"></i>
+                                                        Download</a>
                                                 </div>
                                             </div>
                                         @endif
@@ -200,7 +228,8 @@
                                         @if (count($cancelledTransaction) > 0)
                                             <div class="row mt-4">
                                                 <div class="col-12">
-                                                    <button class="btn btn-primary float-end"><i class="ti ti-download"></i>
+                                                    <button class="btn btn-primary float-end"><i
+                                                            class="ti ti-download"></i>
                                                         Download</button>
                                                 </div>
                                             </div>
