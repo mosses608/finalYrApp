@@ -490,7 +490,7 @@ class PageController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        $locations = $completedRequests->whereBetween('IPR.created_at', [$startOfWeek, $endOfWeek])->pluck('pickupLocation')->filter()
+        $locations = $completedRequests->whereNotBetween('IPR.created_at', [$startOfWeek, $endOfWeek])->pluck('pickupLocation')->filter()
             ->unique()
             ->values();
 
