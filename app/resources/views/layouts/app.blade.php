@@ -78,12 +78,21 @@
                                                 <strong>{{ $balance->currency . ' ' . number_format($balance->balance, 2) }}</strong></a>
                                         </div>
                                     @endif
+                                    @if (Auth::user()->user_type === 1)
+                                    <div class="col-4">
+                                        <a class="nav-link " href="#" id="drop2">
+                                            <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
+                                                width="35" height="35" class="rounded-circle">
+                                        </a>
+                                    </div>
+                                    @else
                                     <div class="col-4">
                                         <a class="nav-link " href="{{ route('profile') }}" id="drop2">
                                             <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
                                                 width="35" height="35" class="rounded-circle">
                                         </a>
                                     </div>
+                                    @endif
                                 </div>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
                                     aria-labelledby="drop2">
