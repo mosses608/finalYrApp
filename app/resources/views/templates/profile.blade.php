@@ -28,13 +28,13 @@
                                             </li>
                                             <li class="list-group-item">
                                                 <strong>Registered At:</strong>
-                                                @if ($$resident->created_at)
+                                                @if ($resident->created_at)
                                                     {{ \Carbon\Carbon::parse($resident->created_at)->format('M d, Y') ?? '' }}
                                                 @endif
                                             </li>
                                             <li class="list-group-item">
                                                 <strong>Updated At:</strong>
-                                                @if ($$resident->updated_at)
+                                                @if ($resident->updated_at)
                                                     {{ \Carbon\Carbon::parse($resident->updated_at)->format('M d, Y') ?? '' }}
                                                 @endif
                                             </li>
