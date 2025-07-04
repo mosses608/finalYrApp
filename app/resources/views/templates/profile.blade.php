@@ -14,7 +14,7 @@
                                     <div class="text-center mb-4">
                                         <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt="Profile Picture"
                                             width="100" height="100" class="rounded-circle shadow">
-                                        <h4 class="mt-3">{{ $resident->name }}</h4>
+                                        <h4 class="mt-3">{{ $resident->name ?? '' }}</h4>
                                         <p class="text-muted">{{ $resident->email ?? 'No email provided' }}</p>
                                     </div>
                                     <hr>
@@ -28,11 +28,11 @@
                                             </li>
                                             <li class="list-group-item">
                                                 <strong>Registered At:</strong>
-                                                {{ \Carbon\Carbon::parse($resident->created_at)->format('M d, Y') }}
+                                                {{ \Carbon\Carbon::parse($resident->created_at)->format('M d, Y') ?? '' }}
                                             </li>
                                             <li class="list-group-item">
                                                 <strong>Updated At:</strong>
-                                                {{ \Carbon\Carbon::parse($resident->updated_at)->format('M d, Y') }}
+                                                {{ \Carbon\Carbon::parse($resident->updated_at)->format('M d, Y') ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -49,7 +49,7 @@
                                                     <label for="" class="form-label">Names
                                                         </label>
                                                     <input type="text" name="name" id="location"
-                                                        class="form-control" value="{{ $resident->name }}">
+                                                        class="form-control" value="{{ $resident->name ?? '' }}">
                                                 </div>
                                                 <div class="col-6">
                                                     <label for="" class="form-label">Phone
