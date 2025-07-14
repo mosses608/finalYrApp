@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Mail\PickUpReminderEmail;
 use Illuminate\Support\Facades\DB;
 use App\Services\CurrencyConverter;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -972,15 +973,46 @@ class PageController extends Controller
         }
 
         $dataExists = DB::table('complaints')
-        ->where('id', $decryptedId)->exists();
+            ->where('id', $decryptedId)->exists();
 
-        if($dataExists === true){
+        if ($dataExists === true) {
             DB::table('complaints')
-            ->where('id', $decryptedId)->update([
-                'responses' => $request->responses,
-            ]);
+                ->where('id', $decryptedId)->update([
+                    'responses' => $request->responses,
+                ]);
         }
 
-        return redirect()->back()->with('success','Feedbacks sent successfully!');
+        return redirect()->back()->with('success', 'Feedbacks sent successfully!');
+    }
+
+    public function updateLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+
+        Log::info('updateLocation called', ['method' => $request->method(), 'data' => $request->all()]);
+
+
+        // $user = DB::table('users')->where('username', Auth::user()->user_id)->first();
+
+        $phone = DB::table('residents')->where('id', Auth::user()->user_id)->value('phone') ?? '0710066540';
+
+        DB::table('locations')->insert([
+            'phone_number' => $phone,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return response()->json(['status' => 'Location updated']);
+    }
+
+    public function trackTruck()
+    {
+        $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
+        $phone = DB::table('residents')->where('id', Auth::user()->user_id)->value('phone') ?? '0710066540';
+        $locations = DB::table('locations')->where('phone_number', $phone)->latest()->first();
+        return view('templates.track-truck', compact('locations','balance'));
     }
 }

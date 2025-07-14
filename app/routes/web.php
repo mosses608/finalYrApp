@@ -51,7 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [App\Http\Controllers\Users\UserController::class, 'profile'])->name('profile');
     Route::put('/update-profile', [App\Http\Controllers\Users\UserController::class, 'updateProfile'])->name('update.profile');
 
+    Route::post('/update-location', [App\Http\Controllers\Pages\PageController::class, 'updateLocation'])->name('update.location');
 
+    Route::get('/track-truck', [App\Http\Controllers\Pages\PageController::class, 'trackTruck'])->name('track.trucks');
     // PAYMENTS
     Route::post('/checkout', [App\Http\Controllers\Payment\PaymentController::class, 'checkoutPay'])->name('pay.ckechout');
     Route::get('/success', [App\Http\Controllers\Payment\PaymentController::class, 'success'])->name('success');

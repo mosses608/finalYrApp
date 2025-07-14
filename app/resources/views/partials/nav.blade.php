@@ -126,7 +126,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="#">
+                            <a class="sidebar-link" href="{{ route('track.trucks') }}">
                                 <i class="ti ti-map-pin"></i>
                                 <span class="hide-menu">Track Truck</span>
                             </a>

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Blockchain-Integrated | Waste System</title>
     <link rel="shortcut icon" type="image/png" href="{{ asset('/assets/images/logos/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
@@ -79,19 +80,19 @@
                                         </div>
                                     @endif
                                     @if (Auth::user()->user_type === 1)
-                                    <div class="col-4">
-                                        <a class="nav-link " href="#" id="drop2">
-                                            <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
-                                                width="35" height="35" class="rounded-circle">
-                                        </a>
-                                    </div>
+                                        <div class="col-4">
+                                            <a class="nav-link " href="#" id="drop2">
+                                                <img src="{{ asset('/assets/images/profile/user-1.jpg') }}"
+                                                    alt="" width="35" height="35" class="rounded-circle">
+                                            </a>
+                                        </div>
                                     @else
-                                    <div class="col-4">
-                                        <a class="nav-link " href="{{ route('profile') }}" id="drop2">
-                                            <img src="{{ asset('/assets/images/profile/user-1.jpg') }}" alt=""
-                                                width="35" height="35" class="rounded-circle">
-                                        </a>
-                                    </div>
+                                        <div class="col-4">
+                                            <a class="nav-link " href="{{ route('profile') }}" id="drop2">
+                                                <img src="{{ asset('/assets/images/profile/user-1.jpg') }}"
+                                                    alt="" width="35" height="35" class="rounded-circle">
+                                            </a>
+                                        </div>
                                     @endif
                                 </div>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
@@ -168,6 +169,43 @@
             alert(notification.title + ": " + notification.body);
         });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("Page loaded");
+        setTimeout(function () {
+            console.log("Starting location tracking...");
 
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(function (position) {
+                    console.log("Got position:", position.coords);
+
+                    fetch('/update-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => console.log("Location sent:", data))
+                    .catch(error => console.error("Error sending location:", error));
+                }, function (error) {
+                    console.error("Geolocation error:", error);
+                }, {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                });
+            } else {
+                console.warn("Geolocation is not supported by this browser.");
+            }
+
+        }, 1500);
+    });
+</script>
 
 </html>

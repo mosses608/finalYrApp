@@ -40,7 +40,7 @@ class AuthenticateController extends Controller
             return back()->with('error', 'Your account is temporarily blocked for' . ' ' . $finalTimer . ' ' . ' minutes from now due to too many login attempts!');
         }
 
-        if(Hash::check($request->password, $user->password)){
+        if (Hash::check($request->password, $user->password)) {
             $user->update([
                 'login_attempts' => 0,
                 'blocked_at' => null,
@@ -48,13 +48,13 @@ class AuthenticateController extends Controller
 
             Auth::login($user);
 
-            return redirect()->route('dashboard')->with('success','Logged in successfully!');
+            return redirect()->route('dashboard')->with('success', 'Logged in successfully!');
         }
 
         $user->increment('login_attempts');
         $remainingAttempts = 3 - $user->login_attempts;
 
-         if ($user->login_attempts >= 3) {
+        if ($user->login_attempts >= 3) {
             $user->update(['blocked_at' => Carbon::now()]);
             return back()->with('error', 'Too many failed login attempts. Your account is now blocked for 30 minutes.');
         }
