@@ -275,7 +275,7 @@
                                                     Date Created
                                                 </th>
                                                 <th scope="col" class="px-0 text-muted">
-                                                    Amount
+                                                    Amount (TZS)
                                                 </th>
                                             </tr>
                                         </thead>
@@ -301,7 +301,7 @@
                                                             class="badge bg-info">{{ \Carbon\Carbon::parse($itm->dueDate)->format('M d, Y') }}</span>
                                                     </td>
                                                     <td class="px-0 text-dark fw-medium">
-                                                        {{ $itm->currency }} {{ number_format($itm->totalPaid, 2) }}
+                                                        {{ number_format($itm->totalPaid, 2) }}
                                                     </td>
                                                 </tr>
                                             @endforeach
