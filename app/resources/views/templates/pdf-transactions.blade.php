@@ -25,8 +25,8 @@
                 <th>Payment ID</th>
                 <th>Payer ID</th>
                 <th>Payer Email</th>
-                <th>Currency</th>
-                <th>Amount</th>
+                {{-- <th>Currency</th> --}}
+                <th>Amount (TZS)</th>
                 <th>Due Date</th>
                 <th>Status</th>
                 <th>Mode</th>
@@ -39,7 +39,7 @@
                 <td>{{ $transaction->payment_id }}</td>
                 <td>{{ $transaction->payer_id }}</td>
                 <td>{{ $transaction->payer_email }}</td>
-                <td>{{ $transaction->currency }}</td>
+                {{-- <td>{{ $transaction->currency }}</td> --}}
                 <td>{{ number_format($transaction->amount, 2) }}</td>
                 <td>{{ \Carbon\Carbon::parse($transaction->created_at)->format('M d, Y') }}</td>
                 <td>Paid</td>
