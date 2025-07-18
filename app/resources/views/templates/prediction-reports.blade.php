@@ -167,8 +167,8 @@
                                                     data: lineWeights,
                                                     backgroundColor: '#007bff',
                                                     borderColor: '#333',
-                                                    borderWidth: 0,
-                                                    fill: true
+                                                    // borderWidth: 0,
+                                                    fill: false
                                                 }]
                                             },
                                             options: {

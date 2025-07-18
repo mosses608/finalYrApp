@@ -25,8 +25,8 @@
                                     <p class="text-muted mb-1">Category: {{ $recyclable->materialCategory }}</p>
                                     <p class="text-muted mb-1">Weight: {{ number_format($recyclable->weight) }}kg</p>
                                     <p class="text-muted mb-1">Listed by: {{ $recyclable->listedBy }}</p>
-                                    <p class="fw-bold text-success">Price: $ {{ number_format($recyclable->price, 2) }} =>
-                                        {{ number_format(\App\Services\CurrencyConverter::convertUsdToTsh($recyclable->price), 2) }}
+                                    <p class="fw-bold text-success">Price:  {{ number_format($recyclable->price, 2) }}
+                                        
                                         TZS </p>
                                         @php
                                             $encryptedId = \Illuminate\Support\Facades\Crypt::encrypt($recyclable->id);
@@ -78,7 +78,7 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="price" class="form-label">Price in (USD)</label>
+                                    <label for="price" class="form-label">Price</label>
                                     <input type="number" step="0.01" class="form-control" name="price" id="price"
                                         required>
                                 </div>
