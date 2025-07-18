@@ -43,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/send-complaints', [App\Http\Controllers\Pages\PageController::class, 'saveComplainnts'])->name('send.complaints');
     Route::get('/manage-complaints', [App\Http\Controllers\Pages\PageController::class, 'manageComplaints'])->name('manage.complaints');
     Route::put('/send-feedbacks', [App\Http\Controllers\Pages\PageController::class, 'sendFeedbacks'])->name('send.feedbacks');
+    Route::get('/download-report', [App\Http\Controllers\Pages\PageController::class, 'downloadReport'])->name('report.pdf');
+
+
 
     // USER MGT
     Route::get('/user-management', [App\Http\Controllers\Users\UserController::class, 'userManagement'])->name('user.management');
@@ -50,6 +53,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/residents-view', [App\Http\Controllers\Users\UserController::class, 'viewResidents'])->name('residents.view');
     Route::get('/profile', [App\Http\Controllers\Users\UserController::class, 'profile'])->name('profile');
     Route::put('/update-profile', [App\Http\Controllers\Users\UserController::class, 'updateProfile'])->name('update.profile');
+    Route::get('/admin-profile', [App\Http\Controllers\Users\UserController::class, 'adminProfile'])->name('admin.profile');
+    Route::put('/update-admin-profile', [App\Http\Controllers\Users\UserController::class, 'updateAdminProfile'])->name('update.admin.profile');
+    Route::put('/delete-user', [App\Http\Controllers\Users\UserController::class, 'deleteUser'])->name('delete.user');
+    Route::put('/block-user', [App\Http\Controllers\Users\UserController::class, 'blockUser'])->name('block.user');
+
 
     Route::post('/update-location', [App\Http\Controllers\Pages\PageController::class, 'updateLocation'])->name('update.location');
 

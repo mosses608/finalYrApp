@@ -50,11 +50,22 @@
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link " href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                            <a class="nav-link" href="/manage-complaints" id="blinking">
                                 <i class="ti ti-bell"></i>
                                 <div class="notification bg-primary rounded-circle"></div>
                             </a>
+                            <style>
+                                #blinking {
+                                    animation: blinker 1s linear infinite;
+                                    color: red;
+                                }
+
+                                @keyframes blinker {
+                                    50% {
+                                        opacity: 0;
+                                    }
+                                }
+                            </style>
                             <div class="dropdown-menu dropdown-menu-animate-up" aria-labelledby="drop1">
                                 <div class="message-body">
                                     <a href="javascript:void(0)" class="dropdown-item">
@@ -81,7 +92,7 @@
                                     @endif
                                     @if (Auth::user()->user_type === 1)
                                         <div class="col-4">
-                                            <a class="nav-link " href="#" id="drop2">
+                                            <a class="nav-link " href="{{ route('admin.profile') }}" id="drop2">
                                                 <img src="{{ asset('/assets/images/profile/user-1.jpg') }}"
                                                     alt="" width="35" height="35" class="rounded-circle">
                                             </a>
@@ -170,30 +181,31 @@
         });
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         console.log("Page loaded");
-        setTimeout(function () {
+        setTimeout(function() {
             console.log("Starting location tracking...");
 
             if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(function (position) {
+                navigator.geolocation.watchPosition(function(position) {
                     console.log("Got position:", position.coords);
 
                     fetch('/update-location', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => console.log("Location sent:", data))
-                    .catch(error => console.error("Error sending location:", error));
-                }, function (error) {
+                        .then(response => response.json())
+                        .then(data => console.log("Location sent:", data))
+                        .catch(error => console.error("Error sending location:", error));
+                }, function(error) {
                     console.error("Geolocation error:", error);
                 }, {
                     enableHighAccuracy: true,

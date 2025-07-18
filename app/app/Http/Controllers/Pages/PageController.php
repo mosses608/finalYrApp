@@ -824,7 +824,10 @@ class PageController extends Controller
 
         return view(
             'templates.prediction-reports',
-            ['predictions' => $predictedData],
+            [
+                'predictions' => $predictedData,
+                'predictionLine' => $predictedData,
+            ],
         );
     }
 
@@ -1013,6 +1016,24 @@ class PageController extends Controller
         $balance = DB::table('wallets')->where('user_id', Auth::user()->user_id)->where('soft_delete', 0)->where('status', 'active')->first();
         $phone = DB::table('residents')->where('id', Auth::user()->user_id)->value('phone') ?? '0710066540';
         $locations = DB::table('locations')->where('phone_number', $phone)->latest()->first();
-        return view('templates.track-truck', compact('locations','balance'));
+        return view('templates.track-truck', compact('locations', 'balance'));
+    }
+
+    public function downloadReport()
+    {
+        $this->predictionReports();
+        $output = shell_exec("python predict_waste.py");
+        $predictedData = json_decode(file_get_contents(storage_path('app/waste_data.json')), true);
+
+        return Pdf::loadView(
+            'templates.prediction-report-print',
+            [
+                'predictions' => $predictedData,
+                'predictionLine' => $predictedData,
+            ],
+        )->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+        ])->download("Report.pdf");
     }
 }

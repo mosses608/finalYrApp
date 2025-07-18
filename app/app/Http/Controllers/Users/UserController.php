@@ -392,22 +392,128 @@ class UserController extends Controller
             ->where('id', $decryptedId)
             ->exists();
 
-        if($userExists == false){
-            return redirect()->back()->with('error','Error!, User not found!');
+        if ($userExists == false) {
+            return redirect()->back()->with('error', 'Error!, User not found!');
         }
 
         try {
             DB::table('residents')->where('id', $decryptedId)
-            ->update([
-                'name' => $request->name,
-                'phone' => $request->phone,
-                'address' => $request->address,
-                'email' => $request->email,
-            ]);
+                ->update([
+                    'name' => $request->name,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'email' => $request->email,
+                ]);
         } catch (\Throwable $th) {
             return $th->getMessage();
         }
 
-        return redirect()->back()->with('success','Profile updated successfuly!');
+        return redirect()->back()->with('success', 'Profile updated successfuly!');
+    }
+
+    public function adminProfile()
+    {
+        $user = DB::table('staff AS S')
+            ->join('users AS U', 'S.id', '=', 'U.user_id')
+            ->join('user_roles AS R', 'S.role', '=', 'R.id')
+            ->select([
+                'U.*',
+                'S.*',
+                'R.name AS roleName',
+            ])
+            ->where('S.id', Auth::user()->user_id)
+            ->first();
+
+        return view('templates.admin-profile', compact('user'));
+    }
+
+    public function updateAdminProfile(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|string',
+            'name' => 'required|string',
+            'phone' => 'nullable|string',
+            // 'address' => 'nullable|string',
+            'email' => 'required|string',
+            // 'password' => 'nullable|string',
+        ]);
+
+        try {
+            $decryptedId = Crypt::decrypt($request->user_id);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        $userExists = DB::table('staff')
+            ->where('id', $decryptedId)
+            ->exists();
+
+        if ($userExists == false) {
+            return redirect()->back()->with('error', 'Error!, User not found!');
+        }
+
+        try {
+            DB::table('staff')->where('id', $decryptedId)
+                ->update([
+                    'names' => $request->name,
+                    'phone_number' => $request->phone,
+                    // 'address' => $request->address,
+                    'email' => $request->email,
+                ]);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
+
+        return redirect()->back()->with('success', 'Profile updated successfuly!');
+    }
+
+    public function deleteUser(Request $request)
+    {
+        $request->validate([
+            'staff_id' => 'required|integer',
+        ]);
+
+        $staffExists = DB::table('staff')
+            ->where('id', $request->staff_id)
+            ->where('soft_delete', 0)
+            ->exists();
+
+        if ($staffExists == false) {
+            return redirect()->back()->with('error', 'Staff does not exists!');
+        }
+
+        DB::table('staff')
+            ->where('id', $request->staff_id)
+            ->where('soft_delete', 0)
+            ->update([
+                'soft_delete' => 1,
+            ]);
+
+        return redirect()->back()->with('success', 'Staff deleted successfully!');
+    }
+
+    public function blockUser(Request $request)
+    {
+        $request->validate([
+            'staff_id' => 'required|integer',
+        ]);
+
+        $staffExists = DB::table('staff')
+            ->where('id', $request->staff_id)
+            ->where('soft_delete', 0)
+            ->exists();
+
+        if ($staffExists == false) {
+            return redirect()->back()->with('error', 'Staff does not exists!');
+        }
+
+        DB::table('staff')
+            ->where('id', $request->staff_id)
+            ->where('soft_delete', 0)
+            ->update([
+                'is_active' => 0,
+            ]);
+
+        return redirect()->back()->with('success', 'Staff blocked successfully!');
     }
 }

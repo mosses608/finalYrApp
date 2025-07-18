@@ -103,7 +103,7 @@ class PaymentController extends Controller
                     'payment_id' => $arr['id'],
                     'payer_id' => $arr['payer']['payer_info']['payer_id'],
                     'payer_email' => $arr['payer']['payer_info']['email'],
-                    'amount' => $arr['transactions'][0]['amount']['total'],
+                    'amount' => CurrencyConverter::convertUsdToTsh($arr['transactions'][0]['amount']['total']),
                     'currency' => env('PAYPAL_CURRENCY'),
                     'status' => $arr['state'],
                     'pick_up_id' => $decrptedRequestId,

@@ -181,7 +181,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label fs-3">Email</label>
                                     <input type="email" class="form-control fs-3" id="email" name="email"
-                                        value="{{ Auth::user()->username }}" readonly>
+                                        value="{{ Auth::user()->username }}">
                                 </div>
 
                                 <div class="col-md-6 mb-3">

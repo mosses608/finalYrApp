@@ -163,7 +163,7 @@
                     </a>
 
                     <!-- Total Streets Counter -->
-                    <a href="#" class="col-md-3 mb-4">
+                    <a href="/pickup-locations" class="col-md-3 mb-4">
                         <div class="card border-0 shadow-lg rounded-3 py-0">
                             <div class="card-body">
                                 <div class="row">

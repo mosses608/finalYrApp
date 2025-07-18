@@ -66,14 +66,15 @@
                                                             <td>{{ $staff->names }}</td>
                                                             <td>
                                                                 @if ($staff->roleId == 1)
-                                                                    <sup class="text-primary"><i class="ti ti-settings"></i></sup>
+                                                                    <sup class="text-primary"><i
+                                                                            class="ti ti-settings"></i></sup>
                                                                 @endif
                                                                 {{ $staff->roleName }}
                                                             </td>
                                                             <td>{{ $staff->email }}</td>
                                                             <td>{{ $staff->phone }}</td>
                                                             <td>{{ $staff->gender }}</td>
-                                                            <td>{{ $staff->regDate }}</td>
+                                                            <td>{{ \Carbon\Carbon::parse($staff->regDate)->format('M d, Y') }}</td>
                                                             <td>
                                                                 @if ($staff->status == 1)
                                                                     <span class="text-success">
@@ -81,13 +82,29 @@
                                                                     </span>
                                                                 @else
                                                                     <span class="text-danger">
-                                                                        <i class="ti ti-circle-x"></i> Inactive
+                                                                        <i class="ti ti-circle-x"></i> Blocked
                                                                     </span>
                                                                 @endif
                                                             </td>
-                                                            <td class="text-nowrap text-center"><a
-                                                                    class="btn btn-primary btn-sm" href="#"><i
-                                                                        class="ti ti-eye"></i></a></td>
+                                                            <td class="text-nowrap">
+                                                                <form action="{{ route('block.user') }}" method="POST">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <input type="hidden" name="staff_id"
+                                                                        value="{{ $staff->autoId }}" id="">
+                                                                    <button type="submit" class="btn btn-primary btn-sm"><i
+                                                                            class="ti ti-ban"></i></button>
+                                                                </form>
+
+                                                                <form action="{{ route('delete.user') }}" method="POST">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <input type="hidden" name="staff_id"
+                                                                        value="{{ $staff->autoId }}" id="">
+                                                                    <button type="submit" class="btn btn-danger btn-sm"><i
+                                                                            class="ti ti-trash"></i></button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>

@@ -123,9 +123,9 @@
                                                         <th scope="col" class="px-0 text-muted">
                                                             Payer Email
                                                         </th>
-                                                        <th>
+                                                        {{-- <th>
                                                             Currency
-                                                        </th>
+                                                        </th> --}}
                                                         <th>
                                                             Amount
                                                         </th>
@@ -150,7 +150,7 @@
                                                             <td>{{ $transaction->payment_id }}</td>
                                                             <td>{{ $transaction->payer_id }}</td>
                                                             <td>{{ $transaction->payer_email }}</td>
-                                                            <td>{{ $transaction->currency }}</td>
+                                                            {{-- <td>{{ $transaction->currency }}</td> --}}
                                                             <td>{{ number_format($transaction->amount, 2) }}</td>
                                                             <td>{{ \Carbon\Carbon::parse($transaction->created_at)->format('M d, Y') }}
                                                             </td>
@@ -198,9 +198,9 @@
                                                         <th scope="col" class="px-0 text-muted">
                                                             Payer Email
                                                         </th>
-                                                        <th>
+                                                        {{-- <th>
                                                             Currency
-                                                        </th>
+                                                        </th> --}}
                                                         <th>
                                                             Amount
                                                         </th>
@@ -216,7 +216,6 @@
                                                             <td>{{ $ctransaction->payment_id }}</td>
                                                             <td>{{ $ctransaction->payer_id }}</td>
                                                             <td>{{ $ctransaction->payer_email }}</td>
-                                                            <td>{{ $ctransaction->currency }}</td>
                                                             <td>{{ number_format($ctransaction->amount, 2) }}</td>
                                                             <td>{{ \Carbon\Carbon::parse($ctransaction->updated_at)->format('M d, Y') }}
                                                             </td>

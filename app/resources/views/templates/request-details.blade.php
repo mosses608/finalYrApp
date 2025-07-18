@@ -281,7 +281,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="amount" class="form-label fs-3">Amount</label>
                                     <input type="numeric" class="form-control fs-3" id="amount" name="amount"
-                                        value="{{ \App\Services\CurrencyConverter::convertUsdToTsh(6.53) }}">
+                                        value="{{ \App\Services\CurrencyConverter::convertUsdToTsh(0.8) }}">
                                 </div>
                             </div>
                         </div>
