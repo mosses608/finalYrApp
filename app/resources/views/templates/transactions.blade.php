@@ -127,7 +127,7 @@
                                                             Currency
                                                         </th> --}}
                                                         <th>
-                                                            Amount
+                                                            Amount (TZS)
                                                         </th>
                                                         <th>
                                                             Due Date
