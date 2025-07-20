@@ -816,17 +816,96 @@ class PageController extends Controller
         return response()->json(['message' => 'Data exported for prediction.']);
     }
 
-    public function runPrediction()
+    public function runPrediction(Request $request)
     {
         $this->predictionReports();
         $output = shell_exec("python predict_waste.py");
         $predictedData = json_decode(file_get_contents(storage_path('app/waste_data.json')), true);
+
+        $wasteProductions = DB::table('recyclables AS RS')
+            ->join('recyclable_material_category AS MT', 'RS.material_type', '=', 'MT.id')
+            ->selectRaw("
+            DATE_FORMAT(RS.created_at, '%Y-%m') AS month,
+            SUM(RS.weight) AS total_weight,
+            RS.title AS title,
+            MT.name AS material_name
+        ")
+            ->where('RS.soft_delete', 0)
+            ->groupByRaw("DATE_FORMAT(RS.created_at, '%Y-%m'), RS.title, MT.name")
+            ->orderByRaw("DATE_FORMAT(RS.created_at, '%Y-%m')")
+            ->get();
+
+        $grouped = $wasteProductions->groupBy('material_name');
+
+        $datasets = [];
+        $allMonths = $wasteProductions->pluck('month')->unique()->sort()->values();
+
+        foreach ($grouped as $material => $records) {
+            $data = [];
+
+            foreach ($allMonths as $month) {
+                $total = $records->firstWhere('month', $month)->total_weight ?? 0;
+                $data[] = $total;
+            }
+
+            $datasets[] = [
+                'label' => $material,
+                'data' => $data,
+                'fill' => false,
+                'borderColor' => '#' . substr(md5($material), 0, 6),
+                'tension' => 0.3
+            ];
+        }
+
+        if ($request->has('from') && $request->has('to') && $request->from != null && $request->to != null) {
+            $fromMonth = \Carbon\Carbon::parse($request->from)->startOfMonth()->toDateString();
+            $toMonth = \Carbon\Carbon::parse($request->to)->endOfMonth()->toDateString();
+
+            $wasteProductions = DB::table('recyclables AS RS')
+                ->join('recyclable_material_category AS MT', 'RS.material_type', '=', 'MT.id')
+                ->selectRaw("
+            DATE_FORMAT(RS.created_at, '%Y-%m') AS month,
+            SUM(RS.weight) AS total_weight,
+            RS.title AS title,
+            MT.name AS material_name
+        ")
+                ->where('RS.soft_delete', 0)
+                ->whereBetween('RS.created_at', [$fromMonth, $toMonth])
+                ->groupByRaw("DATE_FORMAT(RS.created_at, '%Y-%m'), RS.title, MT.name")
+                ->orderByRaw("DATE_FORMAT(RS.created_at, '%Y-%m')")
+                ->get();
+
+            $grouped = $wasteProductions->groupBy('material_name');
+
+            $datasets = [];
+            $allMonths = $wasteProductions->pluck('month')->unique()->sort()->values();
+
+            foreach ($grouped as $material => $records) {
+                $data = [];
+
+                foreach ($allMonths as $month) {
+                    $total = $records->firstWhere('month', $month)->total_weight ?? 0;
+                    $data[] = $total;
+                }
+
+                $datasets[] = [
+                    'label' => $material,
+                    'data' => $data,
+                    'fill' => false,
+                    'borderColor' => '#' . substr(md5($material), 0, 6),
+                    'tension' => 0.3
+                ];
+            }
+        }
 
         return view(
             'templates.prediction-reports',
             [
                 'predictions' => $predictedData,
                 'predictionLine' => $predictedData,
+                'monthsxyz' => $allMonths,
+                'datasetsxyz' => $datasets,
+                'wasteProductions' => $wasteProductions,
             ],
         );
     }

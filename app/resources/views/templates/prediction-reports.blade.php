@@ -10,6 +10,136 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="card-header">
+                                <p class="text-primary">Current Analytics For Waste Generation</p>
+                            </div>
+                            <form action="{{ route('prediction.reports') }}" method="GET" class="row">
+                                @csrf
+                                <div class="col-5">
+                                    <input type="month" class="form-control" name="from"
+                                        max="{{ \Carbon\Carbon::today()->format('Y-m') }}"
+                                        value="{{ old('from', \Carbon\Carbon::now()->format('Y-m')) }}">
+                                </div>
+
+                                <div class="col-5">
+                                    <input type="month" class="form-control" name="to"
+                                        value="{{ old('to', \Carbon\Carbon::now()->format('Y-m')) }}">
+                                </div>
+
+                                <div class="col-2">
+                                    <button type="submit" class="btn btn-primary float-end">Search</button>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <div class="col-12 mt-3">
+                                    <div class="table-responsive mt-0">
+                                        <table class="table mb-0 text-nowrap varient-table align-middle fs-3"
+                                            id="table-responsive1">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="px-0 text-muted">
+                                                        S/N
+                                                    </th>
+                                                    <th>Month</th>
+                                                    <th>Waste Name</th>
+                                                    <th>Waste Type</th>
+                                                    <th>Produced Weight (kg)</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            @php
+                                                $n = 1;
+                                            @endphp
+                                            <tbody>
+                                                @foreach ($wasteProductions as $waste)
+                                                    @php
+                                                        $weight = $waste->total_weight ?? 0;
+
+                                                        if ($weight >= 100) {
+                                                            $status = 'Danger';
+                                                            $color = 'text-danger';
+                                                        } elseif ($weight >= 50) {
+                                                            $status = 'Warning';
+                                                            $color = 'text-warning';
+                                                        } else {
+                                                            $status = 'Normal';
+                                                            $color = 'text-success';
+                                                        }
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $n++ }}</td>
+                                                        <td>{{ $waste->month }}</td>
+                                                        <td>{{ $waste->title }}</td>
+                                                        <td>{{ $waste->material_name }}</td>
+                                                        <td>{{ $waste->total_weight }}</td>
+                                                        <td class="{{ $color }}">
+                                                            <strong>{{ $status }}</strong>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <canvas id="wasteChartId" height="50" width="100"></canvas>
+                                </div>
+                                <script>
+                                    const wasteLineChartCanvas = document.getElementById('wasteChartId').getContext('2d');
+                                    const wasteLineChartLabels = {!! json_encode($monthsxyz) !!};
+                                    const wasteLineChartDatasets = {!! json_encode($datasetsxyz) !!};
+
+                                    const wasteLineChart = new Chart(wasteLineChartCanvas, {
+                                        type: 'line',
+                                        data: {
+                                            labels: wasteLineChartLabels,
+                                            datasets: wasteLineChartDatasets
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            plugins: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Waste Production (by Material Type)'
+                                                },
+                                                tooltip: {
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                }
+                                            },
+                                            interaction: {
+                                                mode: 'nearest',
+                                                axis: 'x',
+                                                intersect: false
+                                            },
+                                            scales: {
+                                                y: {
+                                                    beginAtZero: true,
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Total Weight (kg)'
+                                                    }
+                                                },
+                                                x: {
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Month'
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                </script>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-header">
                                 <p class="text-primary">Predictions & Analytics after 5 months</p>
                             </div>
                             <div class="card-body">
@@ -65,11 +195,12 @@
                                             </table>
                                         </div>
                                         <div class="row mt-4">
-                                                <div class="col-12">
-                                                    <a href="{{ route('report.pdf') }}" class="btn btn-primary float-end"><i class="ti ti-download"></i>
-                                                        Download</a>
-                                                </div>
+                                            <div class="col-12">
+                                                <a href="{{ route('report.pdf') }}" class="btn btn-primary float-end"><i
+                                                        class="ti ti-download"></i>
+                                                    Download</a>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
 
