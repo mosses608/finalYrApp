@@ -15,10 +15,10 @@ return new class extends Migration
             Schema::create('contracts', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('recyclable_id')->constrained('recyclables');
-                $table->foreignId('buyer_id')->constrained('users');
-                $table->foreignId('seller_id')->constrained('users');
+                $table->foreignId('buyer_id');
+                $table->foreignId('seller_id');
                 $table->decimal('price_usd', 10, 2);
-                $table->string('status')->default('Pending'); // or: Pending, Approved, Completed, Rejected
+                $table->string('status')->default('Pending');
                 $table->json('blockchain_data')->nullable();
                 $table->timestamps();
             });

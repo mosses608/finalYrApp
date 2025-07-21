@@ -16,8 +16,8 @@
                             <p><strong>Material:</strong> {{ $recyclable->title }}</p>
                             {{-- <p><strong>Category:</strong> {{ $recyclable->material_type }}</p> --}}
                             <p><strong>Weight:</strong> {{ $recyclable->weight }} kg</p>
-                            <p><strong>Buyer:</strong> {{ $userData->name }}</p>
-                            <p><strong>Seller:</strong> {{ $sellerData->name }}</p>
+                            <p><strong>Buyer:</strong> {{ $userData->name ?? '' }}</p>
+                            <p><strong>Seller:</strong> {{ $sellerData->name ?? '' }}</p>
                             <p><strong>Price:</strong> ${{ number_format($contract->price_usd, 2) }}</p>
                             <p><strong>Status:</strong> <span class="badge bg-info">{{ $contract->status }}</span></p>
 
