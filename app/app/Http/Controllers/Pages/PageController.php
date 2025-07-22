@@ -798,15 +798,14 @@ class PageController extends Controller
     public function predictionReports()
     {
         $data = DB::table('recyclables AS RS')
-            ->join('recyclable_material_category AS MT', 'RS.material_type', '=', 'MT.id')
-            ->selectRaw("
-            DATE_FORMAT(RS.created_at, '%Y-%m') AS month,
-            SUM(RS.weight) AS total_weight,
-            RS.title AS title,
-            MT.name AS material_name
-        ")
             ->where('RS.soft_delete', 0)
-            ->groupByRaw("DATE_FORMAT(RS.created_at, '%Y-%m'), RS.title, MT.name")
+            ->selectRaw("
+        DATE_FORMAT(RS.created_at, '%Y-%m') AS month,
+        SUM(RS.weight) AS total_weight,
+        RS.material_type AS material_type,
+        RS.title AS title
+    ")
+            ->groupByRaw("DATE_FORMAT(RS.created_at, '%Y-%m'), RS.material_type, RS.title")
             ->orderByRaw("DATE_FORMAT(RS.created_at, '%Y-%m')")
             ->get();
 
@@ -816,11 +815,23 @@ class PageController extends Controller
         return response()->json(['message' => 'Data exported for prediction.']);
     }
 
+
     public function runPrediction(Request $request)
     {
         $this->predictionReports();
-        $output = shell_exec("python predict_waste.py");
+
+        shell_exec("python predict_waste.py");
+
+        shell_exec("python3 random_forest.py");
+
         $predictedData = json_decode(file_get_contents(storage_path('app/waste_data.json')), true);
+
+        $randomForestData = json_decode(file_get_contents(storage_path('app/random_forest_data.json')), true);
+
+        $materialTypes = DB::table('recyclable_material_category')
+            ->select('id', 'name')
+            ->where('soft_delete', 0)
+            ->get();
 
         $wasteProductions = DB::table('recyclables AS RS')
             ->join('recyclable_material_category AS MT', 'RS.material_type', '=', 'MT.id')
@@ -906,6 +917,9 @@ class PageController extends Controller
                 'monthsxyz' => $allMonths,
                 'datasetsxyz' => $datasets,
                 'wasteProductions' => $wasteProductions,
+
+                'randomForestData' => $randomForestData,
+                'materialTypes' => $materialTypes
             ],
         );
     }
