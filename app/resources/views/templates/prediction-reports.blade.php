@@ -414,27 +414,52 @@
                                     <canvas id="rfPredictionChart" height="400"></canvas>
                                     <script>
                                         const rfLineDataSet = @json($randomForestData);
+                                        const materialTypes = @json($materialTypes->pluck('name', 'id'));
 
-                                        const rfLineMonths = rfLineDataSet.map(item => item.month);
-                                        const rfLineWeights = rfLineDataSet.map(item => item.total_weight);
+                                        // Group data by material name and month, summing weights
+                                        const groupedLineData = {};
+
+                                        rfLineDataSet.forEach(entry => {
+                                            const materialName = materialTypes[entry.material_type] || 'Unknown';
+                                            const month = entry.month;
+                                            const weight = parseFloat(entry.total_weight) || 0;
+
+                                            if (!groupedLineData[materialName]) groupedLineData[materialName] = {};
+                                            if (!groupedLineData[materialName][month]) groupedLineData[materialName][month] = 0;
+
+                                            groupedLineData[materialName][month] += weight;
+                                        });
+
+                                        // Collect all months across all materials, sorted
+                                        const allLineMonthsSet = new Set();
+                                        Object.values(groupedLineData).forEach(monthsObj => {
+                                            Object.keys(monthsObj).forEach(m => allLineMonthsSet.add(m));
+                                        });
+                                        const allLineMonths = Array.from(allLineMonthsSet).sort();
+
+                                        // Create datasets for each material type
+                                        const lineDatasets = Object.entries(groupedLineData).map(([materialName, monthsObj], index) => {
+                                            const hue = (index * 60) % 360;
+                                            return {
+                                                label: materialName,
+                                                data: allLineMonths.map(month => monthsObj[month] || 0),
+                                                fill: false,
+                                                borderColor: `hsl(${hue}, 70%, 50%)`,
+                                                backgroundColor: `hsla(${hue}, 70%, 50%, 0.2)`,
+                                                tension: 0.3,
+                                                pointRadius: 5,
+                                                pointHoverRadius: 7,
+                                                borderWidth: 2,
+                                            };
+                                        });
 
                                         const rfLineCtx = document.getElementById('rfPredictionChart').getContext('2d');
 
                                         const rfLineChartInstance = new Chart(rfLineCtx, {
                                             type: 'line',
                                             data: {
-                                                labels: rfLineMonths,
-                                                datasets: [{
-                                                    label: 'Predicted Waste (Line - Random Forest)',
-                                                    data: rfLineWeights,
-                                                    fill: false,
-                                                    borderColor: 'rgba(255, 159, 64, 1)',
-                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                                                    tension: 0.3,
-                                                    pointRadius: 5,
-                                                    pointHoverRadius: 7,
-                                                    borderWidth: 2,
-                                                }]
+                                                labels: allLineMonths,
+                                                datasets: lineDatasets
                                             },
                                             options: {
                                                 responsive: true,
@@ -465,33 +490,56 @@
                                             }
                                         });
                                     </script>
-
-
                                 </div>
-                                <div class="row card p-3 mt-5">
+                                {{-- <div class="row card p-3 mt-5">
                                     <p class="text-primary">📈 Bar Chart</p>
-                                    <canvas id="rfPredictionBarChart" height="400"></canvas>
+                                    <canvas id="rfPredictionBarChart1" height="400"></canvas>
 
                                     <script>
-                                        const rfBarDataSet = @json($randomForestData);
+                                        const rfBarRawData = @json($randomForestData);
+                                        const barMaterialMap = @json($materialTypes->pluck('name', 'id'));
 
-                                        const rfBarMonths = rfBarDataSet.map(entry => entry.month);
-                                        const rfBarWeights = rfBarDataSet.map(entry => entry.total_weight); // FIXED key
+                                        const barGroupedData = {};
 
-                                        const rfBarCanvas = document.getElementById('rfPredictionBarChart').getContext('2d');
+                                        rfBarRawData.forEach(entry => {
+                                            const materialName = barMaterialMap[String(entry.material_type)] || 'Unknown'; // cast key to string
+                                            const month = entry.month;
+                                            const weight = parseFloat(entry.total_weight) || 0;
 
-                                        const rfBarChartInstance = new Chart(rfBarCanvas, {
+                                            if (!barGroupedData[materialName]) barGroupedData[materialName] = {};
+                                            if (!barGroupedData[materialName][month]) barGroupedData[materialName][month] = 0;
+
+                                            barGroupedData[materialName][month] += weight;
+                                        });
+
+                                        const barAllMonthsSet = new Set();
+                                        Object.values(barGroupedData).forEach(monthsObj => {
+                                            Object.keys(monthsObj).forEach(m => barAllMonthsSet.add(m));
+                                        });
+                                        const barAllMonths = Array.from(barAllMonthsSet).sort();
+
+                                        const barDatasets = Object.entries(barGroupedData).map(([materialName, monthsObj], index) => {
+                                            const hue = (index * 60) % 360;
+                                            return {
+                                                label: materialName,
+                                                data: barAllMonths.map(month => monthsObj[month] || 0),
+                                                backgroundColor: `hsla(${hue}, 70%, 50%, 0.6)`,
+                                                borderColor: `hsl(${hue}, 70%, 40%)`,
+                                                borderWidth: 1,
+                                                borderRadius: 5,
+                                            };
+                                        });
+
+                                        console.log('Canvas:', document.getElementById('rfPredictionBarChart1'));
+                                        console.log('Labels:', barAllMonths);
+                                        console.log('Datasets:', barDatasets);
+
+                                        const barCtx = document.getElementById('rfPredictionBarChart1').getContext('2d');
+                                        const rfBarChartInstance = new Chart(barCtx, {
                                             type: 'bar',
                                             data: {
-                                                labels: rfBarMonths,
-                                                datasets: [{
-                                                    label: 'Predicted Waste (Bar - Random Forest)',
-                                                    data: rfBarWeights,
-                                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                                    borderWidth: 1,
-                                                    borderRadius: 5,
-                                                }]
+                                                labels: barAllMonths,
+                                                datasets: barDatasets
                                             },
                                             options: {
                                                 responsive: true,
@@ -522,9 +570,7 @@
                                             }
                                         });
                                     </script>
-
-
-                                </div>
+                                </div> --}}
 
                             </div>
                         </div>

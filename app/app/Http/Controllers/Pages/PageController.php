@@ -822,7 +822,7 @@ class PageController extends Controller
 
         shell_exec("python predict_waste.py");
 
-        shell_exec("python3 random_forest.py");
+        shell_exec("python random_forest.py");
 
         $predictedData = json_decode(file_get_contents(storage_path('app/waste_data.json')), true);
 

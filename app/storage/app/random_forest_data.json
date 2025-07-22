@@ -1,1 +1,38 @@
-[{"month":"2025-05","total_weight":"120.00","material_type":1,"title":"Plastic bottles"},{"month":"2025-06","total_weight":"40.00","material_type":1,"title":"Plastic Bottles"},{"month":"2025-06","total_weight":"70.00","material_type":2,"title":"Metal Bottle"},{"month":"2025-07","total_weight":"100.00","material_type":3,"title":"News papers"}]
+[
+    {
+        "month": "2025-02",
+        "total_weight": "405.00",
+        "material_type": 4,
+        "title": "Glass Bottles"
+    },
+    {
+        "month": "2025-03",
+        "total_weight": "108.00",
+        "material_type": 1,
+        "title": "Plastic bottles"
+    },
+    {
+        "month": "2025-04",
+        "total_weight": "207.00",
+        "material_type": 2,
+        "title": "metal can"
+    },
+    {
+        "month": "2025-05",
+        "total_weight": "108.00",
+        "material_type": 3,
+        "title": "paper"
+    },
+    {
+        "month": "2025-06",
+        "total_weight": "450.00",
+        "material_type": 2,
+        "title": "metal"
+    },
+    {
+        "month": "2025-06",
+        "total_weight": "603.00",
+        "material_type": 5,
+        "title": "scraps Electronics"
+    }
+]

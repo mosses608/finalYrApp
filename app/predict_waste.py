@@ -7,7 +7,7 @@ import numpy as np
 # === Step 1: Load historical data ===
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 data_path = os.path.join(project_root, 'storage', 'app', 'waste_data.json')
-output_path = os.path.join(project_root, 'storage', 'app', 'waste_data.json')
+output_path = os.path.join(project_root, 'storage', 'app', 'waste_linear_regression_predictions.json')  # Changed output file
 
 print(f"🔄 Reading data from: {data_path}")
 data = pd.read_json(data_path)
@@ -45,7 +45,7 @@ for i in range(5):
         'predicted_weight': round(predictions[i], 2)
     })
 
-# Save to JSON
+# Save to new JSON file with predictions only
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(results, f, indent=4)
