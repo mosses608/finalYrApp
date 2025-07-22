@@ -180,8 +180,11 @@
                                                                 $color = 'text-success';
                                                             }
 
-                                                            $material = $materialTypes->firstWhere('id', $row['material_type']);
-                                                            
+                                                            $material = $materialTypes->firstWhere(
+                                                                'id',
+                                                                $row['material_type'],
+                                                            );
+
                                                         @endphp
                                                         <tr>
                                                             <td>{{ $n++ }}</td>
@@ -211,44 +214,39 @@
                                     <p class="text-primary">📈 Waste Generation Forecast (Next 5 Months)</p>
                                     <canvas id="predictionChart" height="400"></canvas>
                                     <script>
-                                        const predictions = @json($predictions);
+                                        const rawDataForWaste = @json($predictions);
 
-                                        const materialWeights = {};
+                                        const barMonths = [...new Set(rawDataForWaste.map(item => item.month))];
+                                        const barTitles = [...new Set(rawDataForWaste.map(item => item.title))];
 
-                                        predictions.forEach(entry => {
-                                            const material = entry.material_name;
-                                            const weight = parseFloat(entry.total_weight) || 0;
+                                        const barDatasets = barTitles.map(title => {
+                                            const data = barMonths.map(month => {
+                                                const found = rawDataForWaste.find(item => item.month === month && item.title === title);
+                                                return found ? parseFloat(found.total_weight) : 0;
+                                            });
 
-                                            if (!materialWeights[material]) {
-                                                materialWeights[material] = 0;
-                                            }
-                                            materialWeights[material] += weight;
+                                            return {
+                                                label: title,
+                                                data: data,
+                                                backgroundColor: '#' + Math.floor(Math.random() * 16777215).toString(16), // Random color
+                                                borderWidth: 1
+                                            };
                                         });
 
-                                        const labels = Object.keys(materialWeights);
-                                        const weights = Object.values(materialWeights);
-
-                                        const ctx = document.getElementById('predictionChart').getContext('2d');
-                                        new Chart(ctx, {
+                                        // Step 3: Create the chart
+                                        const ctxBar = document.getElementById('predictionChart').getContext('2d');
+                                        new Chart(ctxBar, {
                                             type: 'bar',
                                             data: {
-                                                labels: labels,
-                                                datasets: [{
-                                                    label: 'Total Predicted Waste after 5 months',
-                                                    data: weights,
-                                                    backgroundColor: '#007bff',
-                                                    // backgroundColor: labels.map((_, i) => `hsl(${i * 50}, 70%, 50%)`),
-                                                    borderColor: '#333',
-                                                    borderWidth: 0,
-                                                    fill: true
-                                                }]
+                                                labels: barMonths,
+                                                datasets: barDatasets
                                             },
                                             options: {
                                                 responsive: true,
                                                 plugins: {
                                                     title: {
-                                                        display: false,
-                                                        text: 'Predicted Waste by Material'
+                                                        display: true,
+                                                        text: 'Monthly Waste Production by Type'
                                                     }
                                                 },
                                                 scales: {
@@ -256,13 +254,13 @@
                                                         beginAtZero: true,
                                                         title: {
                                                             display: true,
-                                                            text: 'Weight (kg)'
+                                                            text: 'Total Weight (kg)'
                                                         }
                                                     },
                                                     x: {
                                                         title: {
                                                             display: true,
-                                                            text: 'Material Type'
+                                                            text: 'Month'
                                                         }
                                                     }
                                                 }
@@ -274,43 +272,40 @@
                                     <p class="text-primary">📈 Line Chart</p>
                                     <canvas id="predictionLineChart" height="400"></canvas>
                                     <script>
-                                        const predictionLineData = @json($predictionLine);
+                                        const wasteLineChartData = @json($predictions);
 
-                                        const lineMaterialWeights = {};
+                                        const wasteLineMonths = [...new Set(wasteLineChartData.map(item => item.month))];
+                                        const wasteLineTitles = [...new Set(wasteLineChartData.map(item => item.title))];
 
-                                        predictionLineData.forEach(entry => {
-                                            const material = entry.material_name;
-                                            const weight = parseFloat(entry.total_weight) || 0;
+                                        const wasteLineDatasets = wasteLineTitles.map(materialTitle => {
+                                            const datasetData = wasteLineMonths.map(month => {
+                                                const match = wasteLineChartData.find(item => item.month === month && item.title ===
+                                                    materialTitle);
+                                                return match ? parseFloat(match.total_weight) : 0;
+                                            });
 
-                                            if (!lineMaterialWeights[material]) {
-                                                lineMaterialWeights[material] = 0;
-                                            }
-                                            lineMaterialWeights[material] += weight;
+                                            return {
+                                                label: materialTitle,
+                                                data: datasetData,
+                                                fill: false,
+                                                borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                                                tension: 0.3
+                                            };
                                         });
 
-                                        const lineLabels = Object.keys(lineMaterialWeights);
-                                        const lineWeights = Object.values(lineMaterialWeights);
-
-                                        const ctx2 = document.getElementById('predictionLineChart').getContext('2d');
-                                        new Chart(ctx2, {
+                                        const ctxWasteLine = document.getElementById('predictionLineChart').getContext('2d');
+                                        new Chart(ctxWasteLine, {
                                             type: 'line',
                                             data: {
-                                                labels: lineLabels,
-                                                datasets: [{
-                                                    label: 'Total Predicted Waste after 5 months',
-                                                    data: lineWeights,
-                                                    backgroundColor: '#007bff',
-                                                    borderColor: '#333',
-                                                    // borderWidth: 0,
-                                                    fill: false
-                                                }]
+                                                labels: wasteLineMonths,
+                                                datasets: wasteLineDatasets
                                             },
                                             options: {
                                                 responsive: true,
                                                 plugins: {
                                                     title: {
-                                                        display: false,
-                                                        text: 'Predicted Waste by Material'
+                                                        display: true,
+                                                        text: 'Predicted Monthly Waste Production by Material Type'
                                                     }
                                                 },
                                                 scales: {
@@ -324,14 +319,13 @@
                                                     x: {
                                                         title: {
                                                             display: true,
-                                                            text: 'Material Type'
+                                                            text: 'Month'
                                                         }
                                                     }
                                                 }
                                             }
                                         });
                                     </script>
-
                                 </div>
 
                             </div>
@@ -346,7 +340,7 @@
                         <div class="card-body">
                             <div class="card-header">
                                 <p class="text-primary">Predictions & Analytics after 5 months (Random Forest
-                                        Model)</p>
+                                    Model)</p>
                             </div>
                             <div class="card-body">
                                 <div class="tab-content mt-0" id="nav-tabContent">
@@ -385,7 +379,10 @@
                                                                 $status = 'Normal';
                                                                 $color = 'text-success';
                                                             }
-                                                            $material = $materialTypes->firstWhere('id', $row['material_type']);
+                                                            $material = $materialTypes->firstWhere(
+                                                                'id',
+                                                                $row['material_type'],
+                                                            );
                                                         @endphp
                                                         <tr>
                                                             <td>{{ $n++ }}</td>
@@ -416,25 +413,27 @@
                                         Model</p>
                                     <canvas id="rfPredictionChart" height="400"></canvas>
                                     <script>
-                                        const rfPredictionData = @json($randomForestData);
+                                        const rfLineDataSet = @json($randomForestData);
 
-                                        const rfLabels = rfPredictionData.map(item => item.month);
-                                        const rfWeights = rfPredictionData.map(item => item.predicted_weight);
+                                        const rfLineMonths = rfLineDataSet.map(item => item.month);
+                                        const rfLineWeights = rfLineDataSet.map(item => item.total_weight);
 
-                                        const rfCtx = document.getElementById('rfPredictionChart').getContext('2d');
-                                        const rfPredictionChart = new Chart(rfCtx, {
+                                        const rfLineCtx = document.getElementById('rfPredictionChart').getContext('2d');
+
+                                        const rfLineChartInstance = new Chart(rfLineCtx, {
                                             type: 'line',
                                             data: {
-                                                labels: rfLabels,
+                                                labels: rfLineMonths,
                                                 datasets: [{
-                                                    label: 'Random Forest Predicted Waste Production (kg)',
-                                                    data: rfWeights,
+                                                    label: 'Predicted Waste (Line - Random Forest)',
+                                                    data: rfLineWeights,
                                                     fill: false,
-                                                    borderColor: 'rgba(255, 99, 132, 1)', // a different color
-                                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
                                                     tension: 0.3,
                                                     pointRadius: 5,
                                                     pointHoverRadius: 7,
+                                                    borderWidth: 2,
                                                 }]
                                             },
                                             options: {
@@ -467,16 +466,17 @@
                                         });
                                     </script>
 
+
                                 </div>
                                 <div class="row card p-3 mt-5">
-                                    <p class="text-primary">📈 Line Chart</p>
+                                    <p class="text-primary">📈 Bar Chart</p>
                                     <canvas id="rfPredictionBarChart" height="400"></canvas>
 
                                     <script>
                                         const rfBarDataSet = @json($randomForestData);
 
                                         const rfBarMonths = rfBarDataSet.map(entry => entry.month);
-                                        const rfBarWeights = rfBarDataSet.map(entry => entry.predicted_weight);
+                                        const rfBarWeights = rfBarDataSet.map(entry => entry.total_weight); // FIXED key
 
                                         const rfBarCanvas = document.getElementById('rfPredictionBarChart').getContext('2d');
 
@@ -522,6 +522,7 @@
                                             }
                                         });
                                     </script>
+
 
                                 </div>
 
